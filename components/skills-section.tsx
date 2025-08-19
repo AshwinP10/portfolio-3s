@@ -50,7 +50,8 @@ export function SkillsSection() {
   return (
     <section id="skills" className="py-20 px-4 bg-muted/30 crt-effect">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-12 text-primary arcade-glow font-mono">SKILL INVENTORY</h2>
+        <h2 className="text-4xl font-bold text-center mb-12 text-primary arcade-glow font-mono">SKILLS
+</h2>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {skillCategories.map((category, index) => (
