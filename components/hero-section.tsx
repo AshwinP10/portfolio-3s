@@ -66,7 +66,11 @@ export function HeroSection() {
             className="border-primary text-primary hover:bg-primary hover:text-primary-foreground font-medium bg-transparent"
             asChild
           >
-            <a href="/resume.pdf" download="Ashwin_Prakash_Resume.pdf">
+            <a
+              href="https://drive.google.com/file/d/15LvWrl5fyEyBbZVb_NuwJcotjk21vT3k/view?usp=sharing"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Download className="mr-2 h-4 w-4" />
               Download Resume
             </a>

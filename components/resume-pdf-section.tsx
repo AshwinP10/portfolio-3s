@@ -19,7 +19,11 @@ export function ResumePdfSection() {
                 <CardTitle className="text-xl">Ashwin Prakash - Resume</CardTitle>
               </div>
               <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" asChild>
-                <a href="/resume.pdf" download="Ashwin_Prakash_Resume.pdf">
+                <a
+                  href="https://drive.google.com/file/d/15LvWrl5fyEyBbZVb_NuwJcotjk21vT3k/view?usp=sharing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <Download className="h-4 w-4 mr-2" />
                   Download PDF
                 </a>

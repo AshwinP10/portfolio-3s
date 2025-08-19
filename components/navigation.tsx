@@ -13,7 +13,7 @@ export function Navigation() {
     { name: "Projects", href: "#projects" },
     { name: "Skills", href: "#skills" },
     { name: "Hobbies", href: "#hobbies" },
-    { name: "Resume", href: "#resume" },
+    { name: "Resume", href: "https://drive.google.com/file/d/15LvWrl5fyEyBbZVb_NuwJcotjk21vT3k/view?usp=sharing" },
   ]
 
   return (
@@ -31,6 +31,8 @@ export function Navigation() {
               <a
                 key={item.name}
                 href={item.href}
+                target={item.name === "Resume" ? "_blank" : undefined}
+                rel={item.name === "Resume" ? "noopener noreferrer" : undefined}
                 className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
               >
                 {item.name}
@@ -54,6 +56,8 @@ export function Navigation() {
                 <a
                   key={item.name}
                   href={item.href}
+                  target={item.name === "Resume" ? "_blank" : undefined}
+                  rel={item.name === "Resume" ? "noopener noreferrer" : undefined}
                   className="block px-3 py-2 text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
                   onClick={() => setIsOpen(false)}
                 >
