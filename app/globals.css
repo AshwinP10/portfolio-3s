@@ -1,0 +1,214 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated to blue and black color scheme */
+  --background: #ffffff; /* Clean white background */
+  --foreground: #1e293b; /* Dark slate text */
+  --card: #f8fafc; /* Very light blue-gray card background */
+  --card-foreground: #1e293b; /* Dark slate card text */
+  --popover: #ffffff; /* White popover */
+  --popover-foreground: #1e293b; /* Dark slate popover text */
+  --primary: #1e40af; /* Deep blue primary */
+  --primary-foreground: #ffffff; /* White text on primary */
+  --secondary: #3b82f6; /* Bright blue secondary */
+  --secondary-foreground: #ffffff; /* White text on secondary */
+  --muted: #f1f5f9; /* Light blue-gray muted background */
+  --muted-foreground: #475569; /* Medium slate muted text */
+  --accent: #0ea5e9; /* Sky blue accent */
+  --accent-foreground: #ffffff; /* White text on accent */
+  --destructive: #dc2626; /* Red destructive */
+  --destructive-foreground: #ffffff; /* White text on destructive */
+  --border: #e2e8f0; /* Light slate borders */
+  --input: #f1f5f9; /* Light blue-gray input background */
+  --ring: rgba(30, 64, 175, 0.5); /* Blue focus ring */
+  --chart-1: #1e40af; /* Deep blue chart color */
+  --chart-2: #3b82f6; /* Blue chart color */
+  --chart-3: #0ea5e9; /* Sky blue chart color */
+  --chart-4: #06b6d4; /* Cyan chart color */
+  --chart-5: #8b5cf6; /* Purple chart color */
+  --radius: 0.5rem; /* Rounded corners */
+  --sidebar: #f8fafc; /* Light blue-gray sidebar */
+  --sidebar-foreground: #1e293b; /* Dark slate sidebar text */
+  --sidebar-primary: #1e40af; /* Deep blue sidebar primary */
+  --sidebar-primary-foreground: #ffffff; /* White sidebar primary text */
+  --sidebar-accent: #3b82f6; /* Blue sidebar accent */
+  --sidebar-accent-foreground: #ffffff; /* White sidebar accent text */
+  --sidebar-border: #e2e8f0; /* Light slate sidebar border */
+  --sidebar-ring: rgba(30, 64, 175, 0.5); /* Blue sidebar focus ring */
+}
+
+.dark {
+  /* Updated dark mode to use black and blue theme */
+  --background: #000000; /* Pure black background */
+  --foreground: #e2e8f0; /* Light slate text */
+  --card: #0f172a; /* Very dark slate card background */
+  --card-foreground: #e2e8f0; /* Light slate card text */
+  --popover: #0f172a; /* Very dark slate popover */
+  --popover-foreground: #e2e8f0; /* Light slate popover text */
+  --primary: #3b82f6; /* Bright blue primary */
+  --primary-foreground: #ffffff; /* White text on primary */
+  --secondary: #1e40af; /* Deep blue secondary */
+  --secondary-foreground: #ffffff; /* White text on secondary */
+  --muted: #1e293b; /* Dark slate muted background */
+  --muted-foreground: #94a3b8; /* Medium slate muted text */
+  --accent: #0ea5e9; /* Sky blue accent */
+  --accent-foreground: #ffffff; /* White text on accent */
+  --destructive: #dc2626; /* Red destructive */
+  --destructive-foreground: #ffffff; /* White text on destructive */
+  --border: #334155; /* Medium slate borders */
+  --input: #1e293b; /* Dark slate input background */
+  --ring: rgba(59, 130, 246, 0.5); /* Blue focus ring */
+  --chart-1: #3b82f6; /* Bright blue chart color */
+  --chart-2: #1e40af; /* Deep blue chart color */
+  --chart-3: #0ea5e9; /* Sky blue chart color */
+  --chart-4: #06b6d4; /* Cyan chart color */
+  --chart-5: #8b5cf6; /* Purple chart color */
+  --sidebar: #000000; /* Pure black sidebar */
+  --sidebar-foreground: #e2e8f0; /* Light slate sidebar text */
+  --sidebar-primary: #3b82f6; /* Bright blue sidebar primary */
+  --sidebar-primary-foreground: #ffffff; /* White sidebar primary text */
+  --sidebar-accent: #1e40af; /* Deep blue sidebar accent */
+  --sidebar-accent-foreground: #ffffff; /* White sidebar accent text */
+  --sidebar-border: #334155; /* Medium slate sidebar border */
+  --sidebar-ring: rgba(59, 130, 246, 0.5); /* Blue sidebar focus ring */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Updated fonts for professional robotics theme */
+  --font-sans: "Geist", system-ui, sans-serif;
+  --font-serif: "Manrope", serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* Updated background pattern to use blue colors */
+    background-image: radial-gradient(circle at 1px 1px, rgba(30, 64, 175, 0.05) 1px, transparent 0);
+    background-size: 20px 20px;
+  }
+
+  /* Added robotics and tech-themed animations */
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 5px rgba(30, 64, 175, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(30, 64, 175, 0.6), 0 0 30px rgba(30, 64, 175, 0.4);
+    }
+  }
+
+  @keyframes circuit-flow {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .tech-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .circuit-border {
+    border: 2px solid;
+    border-image: linear-gradient(45deg, #1e40af, #3b82f6, #0ea5e9) 1;
+    position: relative;
+  }
+
+  .circuit-border::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #1e40af, #3b82f6, #0ea5e9, #1e40af);
+    background-size: 200% 200%;
+    animation: circuit-flow 3s ease infinite;
+    border-radius: inherit;
+    z-index: -1;
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #1e40af, #3b82f6, #0ea5e9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .tech-pattern {
+    background-image: linear-gradient(
+        90deg,
+        transparent 24%,
+        rgba(30, 64, 175, 0.05) 25%,
+        rgba(30, 64, 175, 0.05) 26%,
+        transparent 27%,
+        transparent 74%,
+        rgba(30, 64, 175, 0.05) 75%,
+        rgba(30, 64, 175, 0.05) 76%,
+        transparent 77%,
+        transparent
+      ),
+      linear-gradient(
+        rgba(30, 64, 175, 0.05) 24%,
+        transparent 25%,
+        transparent 26%,
+        rgba(30, 64, 175, 0.05) 27%,
+        rgba(30, 64, 175, 0.05) 74%,
+        transparent 75%,
+        transparent 76%,
+        rgba(30, 64, 175, 0.05) 77%,
+        rgba(30, 64, 175, 0.05)
+      );
+    background-size: 50px 50px;
+  }
+}
