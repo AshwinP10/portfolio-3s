@@ -13,24 +13,23 @@ export function AboutSection() {
           />
         </div>
 
-        <h2 className="text-4xl font-bold text-center mb-4 gradient-text">About Me</h2>
-        <p className="text-xl text-muted-foreground text-center mb-16 max-w-3xl mx-auto">
-          A UT Austin student passionate about AI, machine learning, and robotics
+        <h2 className="text-4xl font-bold text-center mb-4 gradient-text">About</h2>
+        <p className="text-lg text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
+          ECE senior at UT Austin working in machine learning, computer vision, and robotics.
         </p>
 
         <div className="grid md:grid-cols-2 gap-12 items-start">
           <div className="flex flex-col items-center md:items-start">
             <div className="text-center md:text-left">
               <p className="text-lg text-foreground mb-6 leading-relaxed">
-                Hi! I'm currently studying Electrical and Computer Engineering with a Robotics minor at UT Austin. I'm
-                really interested in machine learning, AI, computer vision, and image processing. Through my internships
-                and research, I've gotten to work on some cool projects involving intelligent systems and robotics.
+                I&apos;m a senior studying Electrical and Computer Engineering with a Robotics minor at UT Austin. My
+                work centers on perception and machine learning &mdash; computer-vision pipelines, multimodal models,
+                sensor fusion, and simulation &mdash; across internships and lab research.
               </p>
 
               <p className="text-lg text-foreground mb-6 leading-relaxed">
-                I love building things that can see and understand the world around them. Whether it's training computer
-                vision models, working with AI systems, or developing robotics applications, I'm always excited to
-                tackle new challenges and learn something new.
+                I like building systems that can see and reason about the physical world, and shipping them end to end:
+                data pipeline, model, evaluation, and deployment on real hardware.
               </p>
 
               <div className="flex flex-wrap gap-4 justify-center md:justify-start">
@@ -56,7 +55,7 @@ export function AboutSection() {
               <div className="space-y-4">
                 <div>
                   <h4 className="font-semibold text-foreground">University of Texas at Austin</h4>
-                  <p className="text-muted-foreground">BS Electrical and Computer Engineering</p>
+                  <p className="text-muted-foreground">B.S. Electrical and Computer Engineering</p>
                   <p className="text-muted-foreground">Minor: Robotics</p>
                   <div className="flex items-center mt-2 flex-wrap gap-4">
                     <div className="flex items-center">
@@ -65,7 +64,7 @@ export function AboutSection() {
                     </div>
                     <div className="flex items-center">
                       <Award className="h-4 w-4 text-secondary mr-1" />
-                      <span className="text-sm text-muted-foreground">GPA: 3.6</span>
+                      <span className="text-sm text-muted-foreground">GPA: 3.7</span>
                     </div>
                     <span className="text-sm text-primary font-medium">Graduating May 2027</span>
                   </div>
@@ -77,8 +76,11 @@ export function AboutSection() {
                 <div className="flex flex-wrap gap-2">
                   {[
                     "Algorithms",
-                    "Software Design",
-                    "Probability",
+                    "Software Testing",
+                    "Software Design & Implementation",
+                    "Data Science Lab",
+                    "Software Lab",
+                    "Probability & Random Processes",
                     "Embedded Systems",
                     "Linear Algebra",
                     "Discrete Mathematics",

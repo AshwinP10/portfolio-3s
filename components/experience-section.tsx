@@ -5,61 +5,59 @@ import { Building, Calendar, MapPin } from "lucide-react"
 export function ExperienceSection() {
   const experiences = [
     {
+      company: "Saronic Technologies",
+      position: "Software Engineering Intern — Texas Convergent",
+      location: "Austin, TX",
+      duration: "August 2026 – Present",
+      achievements: [
+        "Building a Python Gym-style API (reset, step, observe) around NVIDIA Isaac Sim to create a closed-loop virtual ocean environment for testing autonomous boat software without a boat in the water.",
+        "Integrating a boat dynamics model with Isaac Sim so autonomy control inputs update boat state and the simulator renders camera observations back to the stack in real time, with configurable scenarios for RL-based navigation training.",
+      ],
+      technologies: ["Python", "NVIDIA Isaac Sim", "Reinforcement Learning", "Simulation", "Autonomy"],
+    },
+    {
+      company: "Amazon",
+      position: "SDE Intern — Computer Vision (Amazon Key, Devices)",
+      location: "Austin, TX",
+      duration: "June 2026 – Present",
+      achievements: [
+        "Building computer-vision pipelines to automate the installation-audit workflow for Amazon Key smart-access devices, parsing electrical schematics and field imagery to replace manual review.",
+        "Training and fine-tuning detection and classification models (YOLO, ResNet) in PyTorch to verify correct device installation and flag wiring and component anomalies from real-world captures.",
+        "Applying transfer learning, targeted data augmentation, and rigorous evaluation to harden perception accuracy under noisy conditions.",
+      ],
+      technologies: ["PyTorch", "YOLO", "ResNet", "Computer Vision", "Transfer Learning"],
+    },
+    {
+      company: "Autonomous Mobile Robotics Laboratory",
+      position: "Robotics Software Engineer — Sensor Fusion & Perception",
+      location: "Austin, TX",
+      duration: "September 2025 – May 2026",
+      achievements: [
+        "Implemented sensor-fusion pipelines combining LiDAR, IMU, and camera data to improve localization accuracy by 27%.",
+        "Implemented open-source visual SLAM and object-tracking modules in ROS 2, reducing pose-estimation drift by 18%.",
+        "Deployed real-time perception and control modules on NVIDIA Jetson for onboard autonomous navigation and obstacle avoidance.",
+      ],
+      technologies: ["ROS 2", "Sensor Fusion", "Visual SLAM", "NVIDIA Jetson", "C++"],
+    },
+    {
       company: "Dell Technologies",
       position: "Software Engineering Intern",
-      location: "Round Rock, Texas",
+      location: "Round Rock, TX",
       duration: "June 2025 – August 2025",
       achievements: [
-        "Designed and deployed an agentic AI system using LangChain, Gemma, Mistral, and Codestral, enabling Dell teams to generate analytical Jira reports via natural language queries, cutting sprint report time by 50%.",
-        "Built a binary issue spillover classifier using a Random Forest Classifier trained on Jira ticket metadata; achieved a test accuracy of 91.3%, aiding proactive triage.",
-        "Integrated RAG pipeline by embedding documents with bge-m3 and querying an Elasticsearch vector store using cosine similarity, boosting contextual relevance in generated insights.",
-        "Containerized the backend with Docker for scalable deployment; utilized COSTAR and chain-of-thought prompting to improve model reasoning and tool usage.",
+        "Developed an AI-powered sprint reporting system using LangChain and Gemma, automating Jira analytics and reducing report generation time by 50%.",
+        "Built and deployed a Random Forest classifier achieving 91% accuracy for issue-spillover prediction, improving triage efficiency.",
       ],
-      technologies: ["LangChain", "Gemma", "Mistral", "Codestral", "Random Forest", "RAG", "Elasticsearch", "Docker"],
-    },
-    {
-      company: "Coley GCS",
-      position: "Backend Software Engineer Contractor — Texas Convergent",
-      location: "Austin, TX",
-      duration: "February 2025 – May 2025",
-      achievements: [
-        "Built an internal CRM using Supabase with PostgreSQL, implementing row-level security, authentication, and granular user permissions.",
-        "Integrated a fine-tuned Gemini LLM to extract and cluster key topics from PDFs, automating contract analysis workflows.",
-        "Engineered backend pipelines and document parsers for ingesting government contracts, enabling metadata tagging and searchability.",
-      ],
-      technologies: ["Supabase", "PostgreSQL", "Gemini LLM", "Python", "PDF Processing"],
-    },
-    {
-      company: "Paradigm Robotics",
-      position: "Software Engineer",
-      location: "Austin, TX",
-      duration: "January 2024 – May 2025",
-      achievements: [
-        "Fine-tuned YOLOv5 on a custom thermal+optical dataset using PyTorch, enabling reliable human detection in low-visibility environments for field robotics.",
-        "Built Python drivers for optical and thermal sensors, streaming data to ROS nodes on containerized Docker/Ubuntu environments.",
-        "Created real-time robot control GUI using OpenCV, WebSockets, and TCP/IP, deployed on embedded Linux Raspberry Pi.",
-      ],
-      technologies: ["YOLOv5", "PyTorch", "ROS", "Docker", "OpenCV", "WebSockets", "Raspberry Pi"],
-    },
-    {
-      company: "Omron Robotics and Safety Technologies",
-      position: "Software Engineering Intern",
-      location: "Pleasanton, CA",
-      duration: "June 2023 – August 2023",
-      achievements: [
-        "Built and deployed a FastAPI REST service on AWS EC2 with password auth, storing credentials in a NoSQL DB and testing endpoints via Postman.",
-        "Enabled ROS Turtlebot and OMRON robot fleet integration by publishing real-time 2D location data to the fleet manager, supporting control of up to 10 robots.",
-      ],
-      technologies: ["FastAPI", "AWS EC2", "NoSQL", "ROS", "Postman"],
+      technologies: ["LangChain", "Gemma", "Random Forest", "Python", "Docker"],
     },
   ]
 
   return (
     <section id="experience" className="py-20 px-4 bg-muted/30">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-4 gradient-text">Professional Experience</h2>
-        <p className="text-xl text-muted-foreground text-center mb-16 max-w-3xl mx-auto">
-          Building innovative solutions at the intersection of AI, robotics, and software engineering
+        <h2 className="text-4xl font-bold text-center mb-4 gradient-text">Experience</h2>
+        <p className="text-lg text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
+          Software, machine learning, and robotics roles across industry and research.
         </p>
 
         <div className="space-y-8">

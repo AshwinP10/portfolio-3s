@@ -5,59 +5,75 @@ import { Code, Database, Cloud, Cpu, Brain, Wrench } from "lucide-react"
 export function SkillsSection() {
   const skillCategories = [
     {
-      title: "Programming Languages",
+      title: "Languages",
       icon: <Code className="h-6 w-6" />,
-      skills: ["Python", "Java", "JavaScript", "C", "C++", "SQL", "HTML5", "CSS", "VHDL", "ARM Assembly"],
+      skills: ["Python", "C", "C++", "Java", "TypeScript", "JavaScript", "SQL", "HTML/CSS", "VHDL", "ARM Assembly"],
     },
     {
-      title: "AI/ML & Data Science",
+      title: "ML & Computer Vision",
       icon: <Brain className="h-6 w-6" />,
       skills: [
         "PyTorch",
         "TensorFlow",
-        "LangChain",
+        "scikit-learn",
         "OpenCV",
+        "YOLO",
         "NumPy",
         "pandas",
-        "Scikit-Learn",
-        "YOLOv5",
-        "RAG",
-        "Diffusion Models",
+        "LangChain",
+        "Hugging Face",
+        "ONNX",
+        "Multimodal Transformers",
+        "Imitation Learning",
       ],
     },
     {
-      title: "Web Development",
+      title: "Web & Backend",
       icon: <Database className="h-6 w-6" />,
-      skills: ["React.js", "Node.js", "FastAPI", "Flask", ".NET", "Supabase", "PostgreSQL", "NoSQL", "SQLite3"],
+      skills: ["React", "Next.js", "Node.js", "Express", "Django", "Flask", "FastAPI", "GraphQL", "Supabase", "PostgreSQL"],
     },
     {
-      title: "Cloud & DevOps",
+      title: "Cloud & Tools",
       icon: <Cloud className="h-6 w-6" />,
-      skills: ["AWS EC2", "Docker", "Kubernetes", "Git", "GitHub", "Postman", "Linux", "Windows"],
+      skills: ["AWS", "AWS CDK", "Docker", "Kubernetes", "Modal", "Git", "GitHub", "Postman", "Linux"],
     },
     {
-      title: "Robotics & Embedded",
+      title: "Robotics & Perception",
       icon: <Cpu className="h-6 w-6" />,
-      skills: ["ROS", "Raspberry Pi", "Embedded Systems", "WebSockets", "TCP/IP", "UART", "KiCAD", "Oscilloscopes"],
+      skills: [
+        "ROS 2",
+        "NVIDIA Isaac Sim",
+        "NVIDIA Jetson",
+        "Visual SLAM",
+        "Sensor Fusion",
+        "Behavior Cloning",
+        "Real-Time Systems",
+        "Embedded Linux",
+      ],
     },
     {
-      title: "Tools & Frameworks",
+      title: "Embedded & Hardware",
       icon: <Wrench className="h-6 w-6" />,
-      skills: ["Selenium", "Elasticsearch", "Hydra", "PyTorch Lightning", "Gemini", "Mistral", "Codestral"],
+      skills: ["C / ARM Firmware", "KiCAD", "PCB Design", "UART", "Multithreading", "Oscilloscopes"],
     },
   ]
 
   return (
-    <section id="skills" className="py-20 px-4 bg-muted/30 crt-effect">
+    <section id="skills" className="py-20 px-4 bg-muted/30">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-12 text-primary arcade-glow font-mono">SKILLS
-</h2>
+        <h2 className="text-4xl font-bold text-center mb-4 gradient-text">Skills</h2>
+        <p className="text-lg text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
+          Tools and technologies I work with day to day.
+        </p>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {skillCategories.map((category, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow arcade-border bg-card">
+            <Card
+              key={index}
+              className="border-2 border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg"
+            >
               <CardHeader>
-                <CardTitle className="flex items-center text-lg text-primary font-mono arcade-glow">
+                <CardTitle className="flex items-center text-lg text-foreground">
                   <div className="text-primary mr-3">{category.icon}</div>
                   {category.title}
                 </CardTitle>
@@ -68,7 +84,7 @@ export function SkillsSection() {
                   {category.skills.map((skill) => (
                     <Badge
                       key={skill}
-                      className="bg-accent/20 text-accent hover:bg-accent/30 font-mono border border-accent text-xs"
+                      className="bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 text-xs"
                     >
                       {skill}
                     </Badge>

@@ -12,8 +12,8 @@ export function Navigation() {
     { name: "Experience", href: "#experience" },
     { name: "Projects", href: "#projects" },
     { name: "Skills", href: "#skills" },
-    { name: "Hobbies", href: "#hobbies" },
-    { name: "Resume", href: "https://drive.google.com/file/d/15LvWrl5fyEyBbZVb_NuwJcotjk21vT3k/view?usp=sharing" },
+    { name: "Contact", href: "#contact" },
+    { name: "Resume", href: "/resume.pdf" },
   ]
 
   return (
