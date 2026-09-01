@@ -21,11 +21,11 @@ export function ExperienceSection() {
       location: "Austin, TX",
       duration: "June 2026 – Present",
       achievements: [
-        "Building computer-vision pipelines to automate the installation-audit workflow for Amazon Key smart-access devices, parsing electrical schematics and field imagery to replace manual review.",
-        "Training and fine-tuning detection and classification models (YOLO, ResNet) in PyTorch to verify correct device installation and flag wiring and component anomalies from real-world captures.",
-        "Applying transfer learning, targeted data augmentation, and rigorous evaluation to harden perception accuracy under noisy conditions.",
+        "Designed a serverless pipeline on AWS (Lambda, EventBridge, API Gateway, S3), provisioned via the AWS CDK in TypeScript, automating the installation-audit workflow for Amazon Key smart-access devices.",
+        "Trained and fine-tuned custom detection and classification models (YOLO, ResNet) in PyTorch to verify correct device installation and flag wiring and component anomalies from real-world captures.",
+        "Layered lightweight computer-vision checks into the pipeline using CNNs, DINOv2 embeddings, and Claude Sonnet 5 vision calls to flag installation anomalies for review.",
       ],
-      technologies: ["PyTorch", "YOLO", "ResNet", "Computer Vision", "Transfer Learning"],
+      technologies: ["AWS Lambda", "AWS CDK", "TypeScript", "PyTorch", "YOLO", "ResNet", "DINOv2"],
     },
     {
       company: "Autonomous Mobile Robotics Laboratory",
@@ -49,6 +49,17 @@ export function ExperienceSection() {
         "Built and deployed a Random Forest classifier achieving 91% accuracy for issue-spillover prediction, improving triage efficiency.",
       ],
       technologies: ["LangChain", "Gemma", "Random Forest", "Python", "Docker"],
+    },
+    {
+      company: "Coley GCS",
+      position: "Backend Software Engineer Contractor — Texas Convergent",
+      location: "Austin, TX",
+      duration: "February 2025 – May 2025",
+      achievements: [
+        "Built an internal CRM using Supabase with PostgreSQL, implementing row-level security, authentication, and granular user permissions.",
+        "Integrated a fine-tuned Gemini LLM to extract and cluster key topics from PDFs, automating contract analysis workflows.",
+      ],
+      technologies: ["Supabase", "PostgreSQL", "Gemini", "Python"],
     },
   ]
 

@@ -39,8 +39,8 @@ export function ProjectsSection() {
       title: "Silicon Prairie",
       subtitle: "Forecasting Austin–San Antonio megacity convergence",
       description:
-        "Modeled 10 years of Sentinel-2 satellite imagery across 43,264 tiles as a latent-space forecasting problem — 512-dim embeddings from a ResNet-18 (benchmarked against a ViT) trained to 98% land-use accuracy, then a 2-layer LSTM with a residual 'delta' formulation to forecast land-use transitions (MSE 0.055). Projects a continuous high-density corridor merging Austin and San Antonio by 2030.",
-      technologies: ["ResNet-18", "ViT", "LSTM", "Satellite Imagery", "PyTorch"],
+        "Modeled 10 years of Sentinel-2 satellite imagery (pulled via Google Earth Engine) across 43,264 tiles as a latent-space forecasting problem — 512-dim embeddings from a ResNet-18 (benchmarked against a ViT) trained to 98% land-use accuracy, then a 2-layer LSTM with a residual 'delta' formulation to forecast land-use transitions (MSE 0.055). Projects a continuous high-density corridor merging Austin and San Antonio by 2030.",
+      technologies: ["ResNet-18", "ViT", "LSTM", "Google Earth Engine", "PyTorch"],
       links: [
         {
           label: "Article",
