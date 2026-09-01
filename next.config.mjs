@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  outputFileTracingRoot: import.meta.dirname,
   eslint: {
     ignoreDuringBuilds: true,
   },
