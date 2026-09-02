@@ -2,12 +2,18 @@
 
 import { useRef, type RefObject } from "react"
 import { useFrame } from "@react-three/fiber"
+import { RoundedBox } from "@react-three/drei"
 import * as THREE from "three"
 import { input } from "./controls"
 
-const WORLD = { minX: -34, maxX: 34, minZ: -20, maxZ: 15 }
+const WORLD = { minX: -40, maxX: 40, minZ: -24, maxZ: 20 }
 const WALK_SPEED = 4.6
 const RUN_SPEED = 7.6
+
+const CREAM = "#f2e4cf"
+const ORANGE = "#e0651f"
+const TEAL = "#22b8a6"
+const AMBER = "#ffbf47"
 
 function dampAngle(current: number, target: number, lambda: number, dt: number) {
   let diff = target - current
@@ -24,16 +30,17 @@ export function Robot({ groupRef, onMove }: Props) {
   const armL = useRef<THREE.Group>(null)
   const armR = useRef<THREE.Group>(null)
   const torso = useRef<THREE.Group>(null)
+  const head = useRef<THREE.Group>(null)
+  const antenna = useRef<THREE.Mesh>(null)
   const phase = useRef(0)
   const speedRef = useRef(0)
   const targetYaw = useRef(0)
 
-  useFrame((_, rawDt) => {
+  useFrame((state, rawDt) => {
     const dt = Math.min(rawDt, 0.05)
     const g = groupRef.current
     if (!g) return
 
-    // ---- desired direction (keyboard or joystick) ----
     let dx = input.right
     let dz = -input.forward
     if (input.touchActive) {
@@ -42,7 +49,6 @@ export function Robot({ groupRef, onMove }: Props) {
     }
     let len = Math.hypot(dx, dz)
 
-    // ---- fast travel ----
     if (input.travelTarget) {
       const tx = input.travelTarget[0] - g.position.x
       const tz = input.travelTarget[1] - g.position.z
@@ -56,7 +62,7 @@ export function Robot({ groupRef, onMove }: Props) {
       }
     }
 
-    let moving = len > 0.08
+    const moving = len > 0.08
     const targetSpeed = moving ? (input.sprint ? RUN_SPEED : WALK_SPEED) * Math.min(len, 1) : 0
     speedRef.current += (targetSpeed - speedRef.current) * (1 - Math.exp(-10 * dt))
 
@@ -72,120 +78,153 @@ export function Robot({ groupRef, onMove }: Props) {
     g.position.z = THREE.MathUtils.clamp(g.position.z, WORLD.minZ, WORLD.maxZ)
     g.rotation.y = dampAngle(g.rotation.y, targetYaw.current, 12, dt)
 
-    // ---- procedural walk ----
     const gait = speedRef.current * 1.15
     phase.current += dt * gait
-    const swing = Math.sin(phase.current) * Math.min(0.6, 0.12 + speedRef.current * 0.06)
+    const swing = Math.sin(phase.current) * Math.min(0.62, 0.14 + speedRef.current * 0.06)
     const lift = speedRef.current > 0.2 ? 1 : 0
     if (legL.current) legL.current.rotation.x = swing * lift
     if (legR.current) legR.current.rotation.x = -swing * lift
-    if (armL.current) armL.current.rotation.x = -swing * lift * 0.8
-    if (armR.current) armR.current.rotation.x = swing * lift * 0.8
+    if (armL.current) armL.current.rotation.x = -swing * lift * 0.85
+    if (armR.current) armR.current.rotation.x = swing * lift * 0.85
     if (torso.current) {
-      torso.current.position.y = 0.02 + Math.abs(Math.sin(phase.current)) * 0.04 * lift
-      const breathe = 1 + Math.sin(phase.current * 0.4) * 0.01 * (1 - lift)
-      torso.current.scale.y = breathe
+      torso.current.position.y = Math.abs(Math.sin(phase.current)) * 0.05 * lift
+      torso.current.rotation.z = Math.sin(phase.current) * 0.03 * lift
     }
+    if (head.current) {
+      head.current.rotation.z = -Math.sin(phase.current) * 0.04 * lift
+      head.current.position.y = 1.28 + Math.sin(state.clock.elapsedTime * 2) * 0.01 * (1 - lift)
+    }
+    if (antenna.current) antenna.current.rotation.z = Math.sin(state.clock.elapsedTime * 3 + phase.current) * 0.18
 
     onMove?.(g.position)
   })
 
-  const bodyMat = <meshStandardMaterial color="#1e3a8a" metalness={0.55} roughness={0.35} />
-  const trimMat = <meshStandardMaterial color="#93c5fd" metalness={0.5} roughness={0.4} />
-  const glowMat = <meshStandardMaterial color="#38bdf8" emissive="#38bdf8" emissiveIntensity={2.2} toneMapped={false} />
-
   return (
-    <group ref={groupRef} position={[0, 0, 0]}>
-      {/* soft contact patch under the robot */}
+    <group ref={groupRef}>
       <mesh rotation-x={-Math.PI / 2} position-y={0.02}>
-        <circleGeometry args={[0.7, 24]} />
-        <meshBasicMaterial color="#4a2f18" transparent opacity={0.12} depthWrite={false} />
+        <circleGeometry args={[0.62, 24]} />
+        <meshBasicMaterial color="#4a2f18" transparent opacity={0.14} depthWrite={false} />
       </mesh>
 
       <group ref={torso}>
-        {/* torso */}
-        <mesh position={[0, 1.15, 0]} castShadow>
-          <boxGeometry args={[0.92, 1.05, 0.55]} />
-          {bodyMat}
-        </mesh>
-        {/* chest light */}
-        <mesh position={[0, 1.2, 0.29]}>
-          <boxGeometry args={[0.26, 0.26, 0.04]} />
-          {glowMat}
-        </mesh>
         {/* hips */}
-        <mesh position={[0, 0.62, 0]}>
-          <boxGeometry args={[0.7, 0.3, 0.5]} />
-          {trimMat}
+        <RoundedBox args={[0.5, 0.3, 0.36]} radius={0.12} smoothness={3} position={[0, 0.66, 0]} castShadow>
+          <meshStandardMaterial color={TEAL} roughness={0.4} metalness={0.15} />
+        </RoundedBox>
+
+        {/* chest */}
+        <RoundedBox args={[0.58, 0.82, 0.4]} radius={0.18} smoothness={4} position={[0, 1.18, 0]} castShadow>
+          <meshStandardMaterial color={CREAM} roughness={0.5} metalness={0.05} />
+        </RoundedBox>
+        <RoundedBox args={[0.34, 0.4, 0.06]} radius={0.06} smoothness={3} position={[0, 1.24, 0.2]}>
+          <meshStandardMaterial color={ORANGE} roughness={0.5} />
+        </RoundedBox>
+        <mesh position={[0, 1.24, 0.235]}>
+          <circleGeometry args={[0.08, 20]} />
+          <meshStandardMaterial color={TEAL} emissive={TEAL} emissiveIntensity={2.6} toneMapped={false} />
+        </mesh>
+
+        {/* backpack */}
+        <RoundedBox args={[0.4, 0.5, 0.22]} radius={0.08} smoothness={3} position={[0, 1.2, -0.28]} castShadow>
+          <meshStandardMaterial color={ORANGE} roughness={0.55} />
+        </RoundedBox>
+        <mesh position={[0, 1.05, -0.4]}>
+          <boxGeometry args={[0.22, 0.06, 0.04]} />
+          <meshStandardMaterial color={AMBER} emissive={AMBER} emissiveIntensity={1.6} toneMapped={false} />
+        </mesh>
+
+        {/* collar / scarf */}
+        <mesh position={[0, 1.58, 0]} rotation-x={Math.PI / 2}>
+          <torusGeometry args={[0.2, 0.06, 8, 18]} />
+          <meshStandardMaterial color="#d9433a" roughness={0.8} />
+        </mesh>
+        <mesh position={[-0.12, 1.4, -0.14]} rotation-z={0.4}>
+          <boxGeometry args={[0.12, 0.4, 0.04]} />
+          <meshStandardMaterial color="#d9433a" roughness={0.8} />
         </mesh>
 
         {/* head */}
-        <group position={[0, 1.95, 0]}>
-          <mesh castShadow>
-            <boxGeometry args={[0.56, 0.5, 0.52]} />
-            {bodyMat}
+        <group ref={head} position={[0, 1.28, 0]}>
+          <RoundedBox args={[0.6, 0.5, 0.5]} radius={0.2} smoothness={4} castShadow>
+            <meshStandardMaterial color={CREAM} roughness={0.45} metalness={0.05} />
+          </RoundedBox>
+          <mesh position={[0, 0.02, 0.235]}>
+            <boxGeometry args={[0.5, 0.2, 0.06]} />
+            <meshStandardMaterial color="#243b52" roughness={0.25} metalness={0.3} />
           </mesh>
-          <mesh position={[0.12, 0.03, 0.27]}>
-            <boxGeometry args={[0.12, 0.12, 0.04]} />
-            {glowMat}
+          {[0.12, -0.12].map((x) => (
+            <mesh key={x} position={[x, 0.03, 0.27]}>
+              <capsuleGeometry args={[0.045, 0.05, 4, 10]} />
+              <meshStandardMaterial color={TEAL} emissive={TEAL} emissiveIntensity={2.4} toneMapped={false} />
+            </mesh>
+          ))}
+          {/* side pods */}
+          {[0.34, -0.34].map((x) => (
+            <mesh key={x} position={[x, 0, 0]} castShadow>
+              <sphereGeometry args={[0.1, 12, 12]} />
+              <meshStandardMaterial color={ORANGE} roughness={0.5} />
+            </mesh>
+          ))}
+          {/* antenna */}
+          <mesh ref={antenna} position={[0.12, 0.34, 0]} castShadow>
+            <cylinderGeometry args={[0.018, 0.022, 0.3, 6]} />
+            <meshStandardMaterial color="#8a6a48" />
           </mesh>
-          <mesh position={[-0.12, 0.03, 0.27]}>
-            <boxGeometry args={[0.12, 0.12, 0.04]} />
-            {glowMat}
-          </mesh>
-          <mesh position={[0, 0.42, 0]}>
-            <cylinderGeometry args={[0.02, 0.02, 0.22, 6]} />
-            {trimMat}
-          </mesh>
-          <mesh position={[0, 0.56, 0]}>
+          <mesh position={[0.16, 0.52, 0]}>
             <sphereGeometry args={[0.05, 10, 10]} />
-            {glowMat}
+            <meshStandardMaterial color={AMBER} emissive={AMBER} emissiveIntensity={2.6} toneMapped={false} />
           </mesh>
         </group>
 
         {/* arms */}
-        <group ref={armL} position={[0.62, 1.55, 0]}>
-          <mesh position={[0, -0.42, 0]} castShadow>
-            <boxGeometry args={[0.2, 0.85, 0.2]} />
-            {bodyMat}
+        <group ref={armL} position={[0.4, 1.42, 0]}>
+          <mesh position={[0.04, -0.02, 0]}>
+            <sphereGeometry args={[0.11, 12, 12]} />
+            <meshStandardMaterial color={TEAL} roughness={0.4} />
           </mesh>
-          <mesh position={[0, -0.9, 0]}>
-            <boxGeometry args={[0.24, 0.16, 0.24]} />
-            {trimMat}
+          <mesh position={[0.04, -0.34, 0]} castShadow>
+            <capsuleGeometry args={[0.085, 0.42, 4, 12]} />
+            <meshStandardMaterial color={CREAM} roughness={0.5} />
+          </mesh>
+          <mesh position={[0.04, -0.62, 0]} castShadow>
+            <sphereGeometry args={[0.11, 14, 12]} />
+            <meshStandardMaterial color={ORANGE} roughness={0.5} />
           </mesh>
         </group>
-        <group ref={armR} position={[-0.62, 1.55, 0]}>
-          <mesh position={[0, -0.42, 0]} castShadow>
-            <boxGeometry args={[0.2, 0.85, 0.2]} />
-            {bodyMat}
+        <group ref={armR} position={[-0.4, 1.42, 0]}>
+          <mesh position={[-0.04, -0.02, 0]}>
+            <sphereGeometry args={[0.11, 12, 12]} />
+            <meshStandardMaterial color={TEAL} roughness={0.4} />
           </mesh>
-          <mesh position={[0, -0.9, 0]}>
-            <boxGeometry args={[0.24, 0.16, 0.24]} />
-            {trimMat}
+          <mesh position={[-0.04, -0.34, 0]} castShadow>
+            <capsuleGeometry args={[0.085, 0.42, 4, 12]} />
+            <meshStandardMaterial color={CREAM} roughness={0.5} />
+          </mesh>
+          <mesh position={[-0.04, -0.62, 0]} castShadow>
+            <sphereGeometry args={[0.11, 14, 12]} />
+            <meshStandardMaterial color={ORANGE} roughness={0.5} />
           </mesh>
         </group>
       </group>
 
-      {/* legs (pivot at hip) */}
-      <group ref={legL} position={[0.22, 0.62, 0]}>
-        <mesh position={[0, -0.4, 0]} castShadow>
-          <boxGeometry args={[0.26, 0.82, 0.26]} />
-          {bodyMat}
+      {/* legs */}
+      <group ref={legL} position={[0.16, 0.62, 0]}>
+        <mesh position={[0, -0.3, 0]} castShadow>
+          <capsuleGeometry args={[0.11, 0.4, 4, 12]} />
+          <meshStandardMaterial color={CREAM} roughness={0.5} />
         </mesh>
-        <mesh position={[0, -0.84, 0.06]}>
-          <boxGeometry args={[0.3, 0.14, 0.4]} />
-          {trimMat}
-        </mesh>
+        <RoundedBox args={[0.24, 0.14, 0.34]} radius={0.06} smoothness={3} position={[0, -0.58, 0.06]} castShadow>
+          <meshStandardMaterial color={TEAL} roughness={0.45} />
+        </RoundedBox>
       </group>
-      <group ref={legR} position={[-0.22, 0.62, 0]}>
-        <mesh position={[0, -0.4, 0]} castShadow>
-          <boxGeometry args={[0.26, 0.82, 0.26]} />
-          {bodyMat}
+      <group ref={legR} position={[-0.16, 0.62, 0]}>
+        <mesh position={[0, -0.3, 0]} castShadow>
+          <capsuleGeometry args={[0.11, 0.4, 4, 12]} />
+          <meshStandardMaterial color={CREAM} roughness={0.5} />
         </mesh>
-        <mesh position={[0, -0.84, 0.06]}>
-          <boxGeometry args={[0.3, 0.14, 0.4]} />
-          {trimMat}
-        </mesh>
+        <RoundedBox args={[0.24, 0.14, 0.34]} radius={0.06} smoothness={3} position={[0, -0.58, 0.06]} castShadow>
+          <meshStandardMaterial color={TEAL} roughness={0.45} />
+        </RoundedBox>
       </group>
     </group>
   )
