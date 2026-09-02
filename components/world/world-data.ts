@@ -16,11 +16,57 @@ export type SignData = {
 }
 
 export const COLORS: Record<SignKind, string> = {
-  about: "#4f46e5",
+  about: "#7c3aed",
   experience: "#1e40af",
   project: "#0ea5e9",
-  contact: "#16a34a",
+  contact: "#0d9488",
   resume: "#f59e0b",
+}
+
+/** Vivid sunset-plaza palette for project/experience posters. */
+export const POSTER_PALETTE = [
+  "#ff6b4a",
+  "#ff9f1c",
+  "#ffd23f",
+  "#8ac926",
+  "#2ec4b6",
+  "#4d7cff",
+  "#9b5de5",
+  "#f15bb5",
+  "#f9844a",
+  "#00bbf9",
+]
+
+export function posterColor(seedId: string): string {
+  let h = 2166136261
+  for (let i = 0; i < seedId.length; i++) {
+    h ^= seedId.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return POSTER_PALETTE[(h >>> 0) % POSTER_PALETTE.length]
+}
+
+export const SIGN_EMOJI: Record<string, string> = {
+  about: "👋",
+  saronic: "🌊",
+  amazon: "📦",
+  amrl: "🤖",
+  dell: "📊",
+  coley: "🗂️",
+  paradigm: "🔥",
+  omron: "🚗",
+  "vqa-disagree": "🧠",
+  davatar: "💧",
+  "silicon-prairie": "🛰️",
+  secondlens: "👓",
+  arcade: "🕹️",
+  stock: "📈",
+  "plate-em": "🍽️",
+  steamboard: "🎮",
+  sat3dgs: "🌐",
+  "this-site": "🌎",
+  contact: "✉️",
+  resume: "📄",
 }
 
 export const ZONES: { label: string; position: [number, number, number] }[] = [
@@ -31,10 +77,10 @@ export const ZONES: { label: string; position: [number, number, number] }[] = [
 
 /** Fast-travel targets shown as chips in the HUD. */
 export const TRAVEL: { label: string; position: [number, number] }[] = [
-  { label: "About", position: [0, -0.5] },
+  { label: "About", position: [0, -3] },
   { label: "Experience", position: [-11, -6] },
   { label: "Projects", position: [13, -6] },
-  { label: "Contact", position: [0, 6.5] },
+  { label: "Contact", position: [3, -13] },
 ]
 
 export const SIGNS: SignData[] = [
@@ -313,7 +359,7 @@ export const SIGNS: SignData[] = [
       { label: "GitHub", href: "https://github.com/AshwinP10" },
       { label: "Résumé PDF", href: "/resume.pdf" },
     ],
-    position: [0, 7],
+    position: [3, -16.5],
   },
 
   // ---------------------------------------------------------------- resume pillar

@@ -96,10 +96,10 @@ export function Robot({ groupRef, onMove }: Props) {
 
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
-      {/* contact shadow */}
-      <mesh rotation-x={-Math.PI / 2} position-y={0.015}>
-        <circleGeometry args={[0.75, 24]} />
-        <meshBasicMaterial color="#0b1220" transparent opacity={0.18} depthWrite={false} />
+      {/* soft contact patch under the robot */}
+      <mesh rotation-x={-Math.PI / 2} position-y={0.02}>
+        <circleGeometry args={[0.7, 24]} />
+        <meshBasicMaterial color="#4a2f18" transparent opacity={0.12} depthWrite={false} />
       </mesh>
 
       <group ref={torso}>
