@@ -70,17 +70,17 @@ export const SIGN_EMOJI: Record<string, string> = {
 }
 
 export const ZONES: { label: string; position: [number, number, number] }[] = [
-  { label: "START", position: [0, 0.02, 4] },
-  { label: "EXPERIENCE", position: [-15, 0.02, -5] },
-  { label: "PROJECTS", position: [15, 0.02, -7] },
+  { label: "START", position: [0, 0.02, 3.5] },
+  { label: "EXPERIENCE", position: [-11, 0.02, -3.5] },
+  { label: "PROJECTS", position: [11, 0.02, -4.5] },
 ]
 
 /** Fast-travel targets shown as chips in the HUD. */
 export const TRAVEL: { label: string; position: [number, number] }[] = [
-  { label: "About", position: [0, -3] },
-  { label: "Experience", position: [-11, -6] },
-  { label: "Projects", position: [13, -6] },
-  { label: "Contact", position: [3, -13] },
+  { label: "About", position: [0, -2.5] },
+  { label: "Experience", position: [-9, -4.5] },
+  { label: "Projects", position: [10, -4.5] },
+  { label: "Contact", position: [2, -10] },
 ]
 
 export const SIGNS: SignData[] = [
@@ -98,7 +98,7 @@ export const SIGNS: SignData[] = [
     ],
     tags: ["Algorithms", "Software Testing", "Data Science Lab", "Embedded Systems", "Probability"],
     links: [{ label: "GitHub", href: "https://github.com/AshwinP10" }],
-    position: [0, -6],
+    position: [0, -5],
   },
 
   // ------------------------------------------------------------- experience
@@ -113,7 +113,7 @@ export const SIGNS: SignData[] = [
       "Integrating a boat dynamics model so autonomy control inputs update boat state and the simulator renders camera observations back to the stack in real time, with configurable scenarios for RL navigation training.",
     ],
     tags: ["Python", "NVIDIA Isaac Sim", "Reinforcement Learning", "Simulation"],
-    position: [-6, -8],
+    position: [-5, -6.5],
   },
   {
     id: "amazon",
@@ -127,7 +127,7 @@ export const SIGNS: SignData[] = [
       "Layered lightweight checks using CNNs, DINOv2 embeddings, and Claude Sonnet 5 vision calls to surface installation anomalies for review.",
     ],
     tags: ["AWS CDK", "TypeScript", "PyTorch", "YOLO", "ResNet", "DINOv2"],
-    position: [-11, -10],
+    position: [-8.5, -8],
   },
   {
     id: "amrl",
@@ -141,7 +141,7 @@ export const SIGNS: SignData[] = [
       "Deployed real-time perception and control modules on NVIDIA Jetson for onboard navigation and obstacle avoidance.",
     ],
     tags: ["ROS 2", "Sensor Fusion", "Visual SLAM", "NVIDIA Jetson", "C++"],
-    position: [-16, -11],
+    position: [-12, -8.5],
   },
   {
     id: "dell",
@@ -155,7 +155,7 @@ export const SIGNS: SignData[] = [
       "Added a RAG pipeline (bge-m3 embeddings + Elasticsearch vector store) and containerized the backend with Docker.",
     ],
     tags: ["LangChain", "Gemma", "Random Forest", "RAG", "Elasticsearch", "Docker"],
-    position: [-20, -9],
+    position: [-15, -7],
   },
   {
     id: "coley",
@@ -169,7 +169,7 @@ export const SIGNS: SignData[] = [
       "Engineered backend pipelines and parsers for ingesting government contracts with metadata tagging and search.",
     ],
     tags: ["Supabase", "PostgreSQL", "Gemini", "Python"],
-    position: [-22, -4],
+    position: [-16.5, -3.5],
   },
   {
     id: "paradigm",
@@ -183,7 +183,7 @@ export const SIGNS: SignData[] = [
       "Built a real-time robot control GUI with OpenCV, WebSockets, and TCP/IP on an embedded Linux Raspberry Pi.",
     ],
     tags: ["YOLOv5", "PyTorch", "ROS", "C++", "OpenCV", "Raspberry Pi"],
-    position: [-21, 0],
+    position: [-15.5, 0],
   },
   {
     id: "omron",
@@ -196,7 +196,7 @@ export const SIGNS: SignData[] = [
       "Integrated a ROS Turtlebot with an OMRON robot fleet, publishing real-time 2D location data to the fleet manager for control of up to 10 robots.",
     ],
     tags: ["FastAPI", "AWS EC2", "NoSQL", "ROS", "Postman"],
-    position: [-17, 3],
+    position: [-12.5, 2.5],
   },
 
   // ---------------------------------------------------------------- projects
@@ -215,7 +215,7 @@ export const SIGNS: SignData[] = [
       { label: "Code", href: "https://github.com/AshwinP10/vqa-disagree" },
       { label: "Dataset", href: "https://huggingface.co/datasets/AshwinP10/VQA-Disagree" },
     ],
-    position: [7, -9],
+    position: [5.5, -7],
   },
   {
     id: "davatar",
@@ -229,7 +229,7 @@ export const SIGNS: SignData[] = [
     ],
     tags: ["PyTorch", "Imitation Learning", "Multimodal Transformers", "Behavior Cloning"],
     links: [{ label: "Website", href: "https://davatar-corl26.github.io/" }],
-    position: [12, -11],
+    position: [9, -8.5],
   },
   {
     id: "silicon-prairie",
@@ -249,7 +249,7 @@ export const SIGNS: SignData[] = [
       },
       { label: "Video", href: "https://www.youtube.com/watch?v=dZCs_dmNhyU" },
     ],
-    position: [17, -12],
+    position: [12.5, -9],
   },
   {
     id: "secondlens",
@@ -266,7 +266,7 @@ export const SIGNS: SignData[] = [
       { label: "Report", href: "https://plume.hackmit.org/project/pakgt-inxow-qfdlj-ipbaa" },
       { label: "Code", href: "https://github.com/AshwinP10/mentra-photo-sender" },
     ],
-    position: [22, -10],
+    position: [16, -7.5],
   },
   {
     id: "arcade",
@@ -283,7 +283,7 @@ export const SIGNS: SignData[] = [
       { label: "Demo", href: "https://youtu.be/-TJatr4mJDc" },
       { label: "Code", href: "https://github.com/AshwinP10/gamelab" },
     ],
-    position: [8, -4],
+    position: [6, -3],
   },
   {
     id: "stock",
@@ -299,7 +299,7 @@ export const SIGNS: SignData[] = [
       { label: "Demo", href: "https://stockindex.streamlit.app" },
       { label: "Code", href: "https://github.com/AshwinP10/StockPricePredictor" },
     ],
-    position: [13, -5],
+    position: [9.5, -4],
   },
   {
     id: "plate-em",
@@ -311,7 +311,7 @@ export const SIGNS: SignData[] = [
       "Built a React Native UI with health metrics and goal planning, and used the GPT API for personalized meal recommendations.",
     ],
     tags: ["React Native", "BeautifulSoup", "Firebase", "GPT API"],
-    position: [18, -6],
+    position: [13, -4.5],
   },
   {
     id: "steamboard",
@@ -321,7 +321,7 @@ export const SIGNS: SignData[] = [
     bullets: ["A React dashboard for exploring Steam game and player statistics."],
     tags: ["React", "Data Visualization"],
     links: [{ label: "Code", href: "https://github.com/AshwinP10/steamboard" }],
-    position: [23, -3],
+    position: [16.5, -2.5],
   },
   {
     id: "sat3dgs",
@@ -331,7 +331,7 @@ export const SIGNS: SignData[] = [
     bullets: ["Team exploration of 3D Gaussian Splatting for reconstruction from satellite imagery."],
     tags: ["3D Gaussian Splatting", "Python"],
     links: [{ label: "Code", href: "https://github.com/NEural-TransmissionS/Sat3DGS" }],
-    position: [20, 0],
+    position: [14.5, 0.5],
   },
   {
     id: "this-site",
@@ -344,7 +344,7 @@ export const SIGNS: SignData[] = [
     ],
     tags: ["Next.js", "React Three Fiber", "TypeScript"],
     links: [{ label: "Code", href: "https://github.com/AshwinP10/portfolio-3s" }],
-    position: [14, 1],
+    position: [10.5, 1],
   },
 
   // ---------------------------------------------------------------- contact
@@ -359,7 +359,7 @@ export const SIGNS: SignData[] = [
       { label: "GitHub", href: "https://github.com/AshwinP10" },
       { label: "Résumé PDF", href: "/resume.pdf" },
     ],
-    position: [3, -16.5],
+    position: [2, -13],
   },
 
   // ---------------------------------------------------------------- resume pillar
@@ -370,6 +370,6 @@ export const SIGNS: SignData[] = [
     subtitle: "One page, PDF",
     bullets: ["The full one-page résumé — experience, projects, and skills."],
     links: [{ label: "Open Résumé (PDF)", href: "/resume.pdf" }],
-    position: [4, 2],
+    position: [3.5, 1.5],
   },
 ]

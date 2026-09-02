@@ -16,7 +16,7 @@ const manrope = Manrope({
 })
 
 export const metadata: Metadata = {
-  title: "Ashwin Prakash — Software / ML / Robotics",
+  title: "Ashwin Prakash's Résumé",
   description:
     "Ashwin Prakash — senior in Electrical & Computer Engineering at UT Austin, working in machine learning, computer vision, and robotics.",
   generator: "v0.app",

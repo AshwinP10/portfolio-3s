@@ -6,7 +6,7 @@ import { Html, Sky } from "@react-three/drei"
 import * as THREE from "three"
 import { Robot } from "./robot"
 import { Sign } from "./sign"
-import { SIGNS, ZONES } from "./world-data"
+import { SIGNS, ZONES, type SignKind } from "./world-data"
 import { bannerTexture } from "./poster-texture"
 import { plazaTexture, fieldTexture } from "./ground-texture"
 import { input } from "./controls"
@@ -31,19 +31,31 @@ import {
   BrickRowhouse,
 } from "./props"
 
-const ACTIVATE_RADIUS = 3.6
-const CAM_OFFSET = new THREE.Vector3(0, 8.4, 14.5)
+const ACTIVATE_RADIUS = 3.2
+const FOLLOW_OFFSET = new THREE.Vector3(0, 6.6, 11.5)
+const FOCUS_DIST = 7
+
+/** Y of each poster's centre — used to aim the focus camera. */
+const POSTER_Y: Record<SignKind, number> = {
+  about: 3.3,
+  contact: 2.5,
+  resume: 2.1,
+  project: 2.85,
+  experience: 3.45,
+}
 
 const LAMPS: [number, number, number][] = Array.from({ length: 8 }, (_, i) => {
   const a = (i / 8) * Math.PI * 2 + 0.3
-  return [Math.cos(a) * 12.8, 0, 1 + Math.sin(a) * 12.8]
+  return [Math.cos(a) * 10, 0, Math.sin(a) * 10]
 })
 
 type Props = {
   activeId: string | null
+  focusId: string | null
   onProximity: (id: string | null) => void
   onSelect: (id: string) => void
   onInteract: () => void
+  onReleaseFocus: () => void
 }
 
 function Lamp({ position, light = false }: { position: [number, number, number]; light?: boolean }) {
@@ -65,7 +77,7 @@ function Lamp({ position, light = false }: { position: [number, number, number];
         <sphereGeometry args={[0.2, 14, 14]} />
         <meshStandardMaterial color="#ffe6b8" emissive="#ffcf87" emissiveIntensity={2.6} toneMapped={false} />
       </mesh>
-      {light && <pointLight position={[0, 3.4, 0]} color="#ffca8a" intensity={6} distance={12} decay={2} />}
+      {light && <pointLight position={[0, 3.4, 0]} color="#ffca8a" intensity={6} distance={11} decay={2} />}
     </group>
   )
 }
@@ -101,7 +113,10 @@ function Building({ position, size, color }: { position: [number, number, number
       </mesh>
       {Array.from({ length: 3 }, (_, r) =>
         Array.from({ length: 3 }, (_, cc) => (
-          <mesh key={`${r}-${cc}`} position={[(cc - 1) * size[0] * 0.28, (r - 1) * size[1] * 0.24 + size[1] * 0.1, size[2] / 2 + 0.02]}>
+          <mesh
+            key={`${r}-${cc}`}
+            position={[(cc - 1) * size[0] * 0.28, (r - 1) * size[1] * 0.24 + size[1] * 0.1, size[2] / 2 + 0.02]}
+          >
             <planeGeometry args={[size[0] * 0.14, size[1] * 0.1]} />
             <meshStandardMaterial color="#ffdca0" emissive="#ffb86b" emissiveIntensity={0.5} toneMapped={false} />
           </mesh>
@@ -114,25 +129,25 @@ function Building({ position, size, color }: { position: [number, number, number
 function EntranceBanner() {
   const tex = useMemo(() => bannerTexture(), [])
   return (
-    <group position={[0, 0, 12.5]}>
-      {[-4.6, 4.6].map((x) => (
+    <group position={[0, 0, 10.5]}>
+      {[-4.3, 4.3].map((x) => (
         <group key={x} position={[x, 0, 0]}>
           <mesh position={[0, 2.6, 0]} castShadow>
-            <cylinderGeometry args={[0.24, 0.3, 5.2, 10]} />
+            <cylinderGeometry args={[0.22, 0.28, 5.2, 10]} />
             <meshStandardMaterial color="#5a3a24" roughness={0.9} />
           </mesh>
           <mesh position={[0, 5.25, 0]} castShadow>
-            <sphereGeometry args={[0.28, 12, 12]} />
+            <sphereGeometry args={[0.26, 12, 12]} />
             <meshStandardMaterial color="#e0651f" roughness={0.5} />
           </mesh>
         </group>
       ))}
       <mesh position={[0, 5.05, 0]} castShadow>
-        <boxGeometry args={[10, 0.4, 0.5]} />
+        <boxGeometry args={[9.2, 0.4, 0.5]} />
         <meshStandardMaterial color="#5a3a24" roughness={0.9} />
       </mesh>
       <mesh position={[0, 4.5, 0.02]}>
-        <planeGeometry args={[9.4, 2]} />
+        <planeGeometry args={[8.6, 1.85]} />
         <meshBasicMaterial map={tex} toneMapped={false} side={THREE.DoubleSide} />
       </mesh>
     </group>
@@ -143,38 +158,38 @@ function Plaza() {
   const stone = useMemo(() => {
     const t = plazaTexture().clone()
     t.needsUpdate = true
-    t.repeat.set(4, 4)
+    t.repeat.set(3.2, 3.2)
     return t
   }, [])
   const spokes = Array.from({ length: 12 }, (_, i) => (i / 12) * Math.PI * 2)
   return (
-    <group position={[0, 0, 1]}>
+    <group position={[0, 0, 0.5]}>
       <mesh rotation-x={-Math.PI / 2} position-y={0.02} receiveShadow>
-        <circleGeometry args={[12.5, 56]} />
+        <circleGeometry args={[9.6, 56]} />
         <meshStandardMaterial map={stone} roughness={0.95} />
       </mesh>
       <mesh rotation-x={-Math.PI / 2} position-y={0.03}>
-        <ringGeometry args={[11.8, 12.5, 56]} />
+        <ringGeometry args={[9, 9.6, 56]} />
         <meshStandardMaterial color="#c9752f" roughness={0.9} />
       </mesh>
       <mesh rotation-x={-Math.PI / 2} position-y={0.03}>
-        <ringGeometry args={[5.2, 5.7, 44]} />
+        <ringGeometry args={[4.4, 4.9, 44]} />
         <meshStandardMaterial color="#d98a4f" roughness={0.9} />
       </mesh>
       {spokes.map((a, i) => (
-        <group key={i} position={[Math.cos(a) * 8.8, 0.028, Math.sin(a) * 8.8]} rotation-y={-a}>
+        <group key={i} position={[Math.cos(a) * 6.7, 0.028, Math.sin(a) * 6.7]} rotation-y={-a}>
           <mesh rotation-x={-Math.PI / 2}>
-            <planeGeometry args={[6, 0.3]} />
+            <planeGeometry args={[4.6, 0.28]} />
             <meshStandardMaterial color="#b9884b" roughness={0.9} />
           </mesh>
         </group>
       ))}
       <mesh rotation-x={-Math.PI / 2} position-y={0.034}>
-        <circleGeometry args={[1.7, 28]} />
+        <circleGeometry args={[1.5, 28]} />
         <meshStandardMaterial color="#d98a4f" roughness={0.9} />
       </mesh>
       <mesh rotation-x={-Math.PI / 2} position-y={0.036}>
-        <ringGeometry args={[1.5, 1.7, 28]} />
+        <ringGeometry args={[1.3, 1.5, 28]} />
         <meshStandardMaterial color="#8a4f22" roughness={0.9} />
       </mesh>
     </group>
@@ -183,38 +198,64 @@ function Plaza() {
 
 function Path({ to }: { to: [number, number] }) {
   const dx = to[0]
-  const dz = to[1] - 1
+  const dz = to[1] - 0.5
   const len = Math.hypot(dx, dz)
   const angle = Math.atan2(dx, dz)
   return (
-    <group position={[dx / 2, 0.018, 1 + dz / 2]} rotation-y={angle}>
+    <group position={[dx / 2, 0.018, 0.5 + dz / 2]} rotation-y={angle}>
       <mesh rotation-x={-Math.PI / 2} receiveShadow>
-        <planeGeometry args={[3.2, len]} />
+        <planeGeometry args={[3, len]} />
         <meshStandardMaterial color="#c9752f" roughness={0.95} transparent opacity={0.5} />
       </mesh>
     </group>
   )
 }
 
-export function Scene({ activeId, onProximity, onSelect, onInteract }: Props) {
+export function Scene({ activeId, focusId, onProximity, onSelect, onInteract, onReleaseFocus }: Props) {
   const robotRef = useRef<THREE.Group>(null)
   const robotPos = useRef(new THREE.Vector3())
-  const lookTarget = useRef(new THREE.Vector3(0, 1.7, 0))
+  const lookTarget = useRef(new THREE.Vector3(0, 1.8, 0))
   const proxAccum = useRef(0)
   const nearestRef = useRef<string | null>(null)
   const lastNonce = useRef(input.interactNonce)
+  const focusTracked = useRef<string | null>(null)
+  const focusReached = useRef(false)
   const { camera } = useThree()
 
   const field = useMemo(() => fieldTexture(), [])
 
   useFrame((_, dt) => {
     const p = robotPos.current
-    camera.position.x = THREE.MathUtils.damp(camera.position.x, p.x + CAM_OFFSET.x, 4, dt)
-    camera.position.y = THREE.MathUtils.damp(camera.position.y, CAM_OFFSET.y, 4, dt)
-    camera.position.z = THREE.MathUtils.damp(camera.position.z, p.z + CAM_OFFSET.z, 4, dt)
-    lookTarget.current.x = THREE.MathUtils.damp(lookTarget.current.x, p.x, 6, dt)
-    lookTarget.current.z = THREE.MathUtils.damp(lookTarget.current.z, p.z - 1.5, 6, dt)
-    lookTarget.current.y = 1.7
+    const focus = focusId ? SIGNS.find((s) => s.id === focusId) : null
+
+    let px: number, py: number, pz: number, lx: number, ly: number, lz: number, lam: number
+    if (focus) {
+      const [sx, sz] = focus.position
+      const rotY = Math.atan2(-sx, -sz)
+      const cy = POSTER_Y[focus.kind]
+      px = sx + Math.sin(rotY) * FOCUS_DIST
+      py = cy + 1.5
+      pz = sz + Math.cos(rotY) * FOCUS_DIST
+      lx = sx
+      ly = cy - 0.2
+      lz = sz
+      lam = 4.5
+    } else {
+      px = p.x + FOLLOW_OFFSET.x
+      py = FOLLOW_OFFSET.y
+      pz = p.z + FOLLOW_OFFSET.z
+      lx = p.x
+      ly = 1.8
+      lz = p.z - 1
+      lam = 4
+    }
+
+    camera.position.x = THREE.MathUtils.damp(camera.position.x, px, lam, dt)
+    camera.position.y = THREE.MathUtils.damp(camera.position.y, py, lam, dt)
+    camera.position.z = THREE.MathUtils.damp(camera.position.z, pz, lam, dt)
+    lookTarget.current.x = THREE.MathUtils.damp(lookTarget.current.x, lx, 6, dt)
+    lookTarget.current.y = THREE.MathUtils.damp(lookTarget.current.y, ly, 6, dt)
+    lookTarget.current.z = THREE.MathUtils.damp(lookTarget.current.z, lz, 6, dt)
     camera.lookAt(lookTarget.current)
 
     proxAccum.current += dt
@@ -233,6 +274,17 @@ export function Scene({ activeId, onProximity, onSelect, onInteract }: Props) {
         nearestRef.current = nearest
         onProximity(nearest)
       }
+      if (focus) {
+        if (focusTracked.current !== focus.id) {
+          focusTracked.current = focus.id
+          focusReached.current = false
+        }
+        const fd = Math.hypot(focus.position[0] - p.x, focus.position[1] - p.z)
+        if (fd < 4.5) focusReached.current = true
+        if (focusReached.current && fd > 8) onReleaseFocus()
+      } else {
+        focusTracked.current = null
+      }
     }
 
     if (input.interactNonce !== lastNonce.current) {
@@ -244,37 +296,37 @@ export function Scene({ activeId, onProximity, onSelect, onInteract }: Props) {
   return (
     <>
       <Sky distance={450} sunPosition={[-40, 3.5, -80]} turbidity={11} rayleigh={3.4} mieCoefficient={0.02} mieDirectionalG={0.92} />
-      <fog attach="fog" args={["#f7c9a0", 34, 110]} />
+      <fog attach="fog" args={["#f7c9a0", 26, 80]} />
 
       <ambientLight intensity={0.4} color="#ffe6c9" />
       <hemisphereLight color="#ffdcae" groundColor="#6b4a33" intensity={0.65} />
       <directionalLight position={[16, 9, 15]} intensity={0.5} color="#9db8ff" />
       <directionalLight
         castShadow
-        position={[-16, 18, -8]}
+        position={[-14, 16, -7]}
         intensity={2.3}
         color="#ffcf9e"
         shadow-mapSize-width={1536}
         shadow-mapSize-height={1536}
         shadow-camera-near={0.5}
-        shadow-camera-far={90}
-        shadow-camera-left={-48}
-        shadow-camera-right={48}
-        shadow-camera-top={48}
-        shadow-camera-bottom={-48}
+        shadow-camera-far={70}
+        shadow-camera-left={-34}
+        shadow-camera-right={34}
+        shadow-camera-top={34}
+        shadow-camera-bottom={-34}
         shadow-bias={-0.0004}
       />
 
       {/* ground */}
       <mesh rotation-x={-Math.PI / 2} position-y={-0.01} receiveShadow>
-        <planeGeometry args={[300, 300]} />
+        <planeGeometry args={[240, 240]} />
         <meshStandardMaterial map={field} color="#e6cfa2" roughness={1} />
       </mesh>
 
       <Plaza />
-      <Path to={[-13, -7]} />
-      <Path to={[15, -8]} />
-      <Path to={[0, -15]} />
+      <Path to={[-10, -5]} />
+      <Path to={[11, -6]} />
+      <Path to={[0, -11]} />
       <EntranceBanner />
 
       {/* zone floor markers */}
@@ -286,50 +338,57 @@ export function Scene({ activeId, onProximity, onSelect, onInteract }: Props) {
           style={{ pointerEvents: "none", userSelect: "none" }}
           zIndexRange={[2, 0]}
         >
-          <span className="text-[13px] font-black tracking-[0.32em] text-amber-900/40">{zone.label}</span>
+          <span className="text-[12px] font-black tracking-[0.3em] text-amber-900/40">{zone.label}</span>
         </Html>
       ))}
 
       {LAMPS.map((pos, i) => (
         <Lamp key={i} position={pos} light={i % 2 === 0} />
       ))}
-      <StringLights spans={LAMPS.map((p, i) => [[p[0], 3.3, p[2]], [LAMPS[(i + 1) % LAMPS.length][0], 3.3, LAMPS[(i + 1) % LAMPS.length][2]]] as [[number, number, number], [number, number, number]])} />
-      <PapelPicado a={[-4.6, 4.8, 12.5]} b={[-6, 3.6, 6]} />
-      <PapelPicado a={[4.6, 4.8, 12.5]} b={[6, 3.6, 6]} />
-      <PapelPicado a={[-8, 3.4, 2]} b={[8, 3.4, 2]} colors={["#ff5d8f", "#ffd23f", "#2ec4b6", "#ff6b4a"]} />
+      <StringLights
+        spans={LAMPS.map(
+          (p, i) =>
+            [
+              [p[0], 3.3, p[2]],
+              [LAMPS[(i + 1) % LAMPS.length][0], 3.3, LAMPS[(i + 1) % LAMPS.length][2]],
+            ] as [[number, number, number], [number, number, number]],
+        )}
+      />
+      <PapelPicado a={[-4.3, 4.8, 10.5]} b={[-6, 3.6, 5]} />
+      <PapelPicado a={[4.3, 4.8, 10.5]} b={[6, 3.6, 5]} />
+      <PapelPicado a={[-7, 3.4, 1.5]} b={[7, 3.4, 1.5]} colors={["#ff5d8f", "#ffd23f", "#2ec4b6", "#ff6b4a"]} />
 
       {/* --- plaza furniture --- */}
-      <Fountain position={[8.5, 0, 6]} />
-      <Bench position={[-8.5, 0, 6]} rotation={-0.6} />
-      <Bench position={[0, 0, 10.5]} rotation={Math.PI} />
-      <Bench position={[-10, 0, -3]} rotation={1.1} />
-      <Bench position={[10.5, 0, -1]} rotation={-1.2} />
-      <Bench position={[6, 0, 9]} rotation={2.5} />
+      <Fountain position={[6.5, 0, 5]} />
+      <Bench position={[-6.5, 0, 5]} rotation={-0.6} />
+      <Bench position={[0, 0, 8.5]} rotation={Math.PI} />
+      <Bench position={[-8, 0, -2]} rotation={1.1} />
+      <Bench position={[8, 0, -1]} rotation={-1.2} />
 
-      <Planter position={[-6, 0, 10]} />
-      <Planter position={[6.5, 0, 11]} palm />
-      <Planter position={[-12, 0, 5]} />
-      <Planter position={[12.5, 0, 4]} palm />
-      <Planter position={[-3, 0, 8]} />
-      <Planter position={[3.5, 0, 6.5]} />
+      <Planter position={[-5, 0, 8]} />
+      <Planter position={[5.5, 0, 8.5]} palm />
+      <Planter position={[-9.5, 0, 3.5]} />
+      <Planter position={[10, 0, 3]} palm />
+      <Planter position={[-2.5, 0, 6.5]} />
+      <Planter position={[3, 0, 5.5]} />
 
-      <Tree position={[-26, 0, -16]} scale={1.1} />
-      <Tree position={[24, 0, -18]} scale={1.2} />
-      <Tree position={[-14, 0, -20]} scale={1.05} />
-      <Tree position={[10, 0, -22]} />
-      <Tree position={[30, 0, -4]} scale={1.15} />
-      <Tree position={[18, 0, 13]} />
+      <Tree position={[-19, 0, -12]} scale={1.1} />
+      <Tree position={[19, 0, -13]} scale={1.15} />
+      <Tree position={[-11, 0, -16]} scale={1.05} />
+      <Tree position={[8, 0, -17]} />
+      <Tree position={[22, 0, -3]} scale={1.1} />
+      <Tree position={[15, 0, 10]} />
 
       {/* distant skyline */}
       {(
         [
-          [-30, -32, 4, 12, 5, "#c8a074"],
-          [-16, -34, 5, 18, 5, "#b98e63"],
-          [0, -36, 6, 10, 6, "#cda67c"],
-          [14, -35, 5, 22, 5, "#bd956a"],
-          [28, -33, 6, 14, 6, "#c8a074"],
-          [-40, -22, 4, 9, 4, "#b98e63"],
-          [39, -20, 4, 11, 4, "#cda67c"],
+          [-22, -24, 4, 12, 5, "#c8a074"],
+          [-11, -26, 5, 18, 5, "#b98e63"],
+          [0, -27, 6, 10, 6, "#cda67c"],
+          [11, -26, 5, 20, 5, "#bd956a"],
+          [22, -24, 6, 14, 6, "#c8a074"],
+          [-30, -16, 4, 9, 4, "#b98e63"],
+          [30, -15, 4, 11, 4, "#cda67c"],
         ] as [number, number, number, number, number, string][]
       ).map(([px, pz, w, h, d, c], i) => (
         <Building key={i} position={[px, h / 2, pz]} size={[w, h, d]} color={c} />
@@ -338,40 +397,40 @@ export function Scene({ activeId, onProximity, onSelect, onInteract }: Props) {
       {/* ===== personal-life props (unlabeled) ===== */}
 
       {/* Austin / live music */}
-      <DisplayPillar position={[-4, 0, 7.5]} height={1.3}>
+      <DisplayPillar position={[-3.5, 0, 6]} height={1.3}>
         <Guitar position={[0, 0, 0]} rotation={0.5} lean={-0.28} />
       </DisplayPillar>
-      <Armadillo position={[-3, 0, 8.6]} rotation={-1} />
+      <Armadillo position={[-2.6, 0, 6.9]} rotation={-1} />
 
       {/* food market: mangos + tacos */}
-      <MarketStall position={[9.5, 0, 8.5]} rotation={-2.4} awning={["#e14b4b", "#f4e3c1"]}>
+      <MarketStall position={[7.5, 0, 7]} rotation={-2.4} awning={["#e14b4b", "#f4e3c1"]}>
         <MangoBasket position={[-0.7, 0, 0]} />
         <TacoPlate position={[0.7, 0.1, 0.1]} />
         <MangoBasket position={[0.2, 0, -0.35]} />
       </MarketStall>
 
       {/* sports: basketball + Celtics */}
-      <MarketStall position={[-9.5, 0, 9] as [number, number, number]} rotation={2.5} awning={["#007a33", "#f4f4f4"]}>
+      <MarketStall position={[-7.5, 0, 7.5]} rotation={2.5} awning={["#007a33", "#f4f4f4"]}>
         <BasketballStand position={[-0.6, 0.05, 0]} />
       </MarketStall>
-      <Pennant position={[-11.5, 0, 8]} color="#007a33" emblem="shamrock" rotation={0.6} />
+      <Pennant position={[-9, 0, 6.5]} color="#007a33" emblem="shamrock" rotation={0.6} />
 
       {/* UT Longhorns */}
-      <Pennant position={[4.5, 0, -10.5]} color="#bf5700" emblem="horns" rotation={-0.3} />
-      <Bevo position={[6.5, 0, -11.5]} rotation={-2.2} />
+      <Pennant position={[3.5, 0, -9]} color="#bf5700" emblem="horns" rotation={-0.3} />
+      <Bevo position={[5, 0, -10]} rotation={-2.2} />
 
       {/* origami */}
-      <OrigamiFlock position={[-2.5, 0, -11]} count={8} />
+      <OrigamiFlock position={[-2, 0, -9.5]} count={8} />
 
       {/* California */}
-      <GoldenGate position={[-22, 0, 12]} rotation={0.5} />
-      <PalmTree position={[-25, 0, 9]} scale={1.15} lean={0.14} />
-      <PalmTree position={[-19, 0, 15]} scale={1} lean={-0.1} />
-      <PalmTree position={[-27, 0, 14]} scale={0.9} lean={0.2} />
+      <GoldenGate position={[-16, 0, 9]} rotation={0.5} />
+      <PalmTree position={[-18.5, 0, 6.5]} scale={1.1} lean={0.14} />
+      <PalmTree position={[-13.5, 0, 11]} scale={0.95} lean={-0.1} />
+      <PalmTree position={[-20, 0, 11]} scale={0.9} lean={0.2} />
 
       {/* Boston */}
-      <BrickRowhouse position={[21, 0, 11]} rotation={-0.5} />
-      <Pennant position={[17, 0, 12]} color="#007a33" emblem="shamrock" rotation={-0.8} />
+      <BrickRowhouse position={[16, 0, 8.5]} rotation={-0.5} />
+      <Pennant position={[12.5, 0, 9.5]} color="#007a33" emblem="shamrock" rotation={-0.8} />
 
       {SIGNS.map((s) => (
         <Sign key={s.id} data={s} active={activeId === s.id} onSelect={onSelect} />

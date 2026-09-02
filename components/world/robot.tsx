@@ -6,7 +6,7 @@ import { RoundedBox } from "@react-three/drei"
 import * as THREE from "three"
 import { input } from "./controls"
 
-const WORLD = { minX: -40, maxX: 40, minZ: -24, maxZ: 20 }
+const WORLD = { minX: -26, maxX: 26, minZ: -17, maxZ: 13 }
 const WALK_SPEED = 4.6
 const RUN_SPEED = 7.6
 

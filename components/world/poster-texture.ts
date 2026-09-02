@@ -152,7 +152,7 @@ export function bannerTexture() {
   ctx.fillText("ASHWIN  PRAKASH", W / 2, 92)
   ctx.shadowBlur = 0
   ctx.font = "600 32px system-ui, sans-serif"
-  ctx.fillText("· interactive portfolio world ·", W / 2, 160)
+  ctx.fillText("· résumé ·", W / 2, 160)
   bannerTex = new THREE.CanvasTexture(c)
   bannerTex.colorSpace = THREE.SRGBColorSpace
   return bannerTex

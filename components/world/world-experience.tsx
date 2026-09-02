@@ -69,6 +69,13 @@ export function WorldExperience() {
   const handleSelect = useCallback((id: string) => {
     setPinnedId(id)
     setDismissedId(null)
+    // walk the robot over to stand in front of that board
+    const s = SIGNS.find((x) => x.id === id)
+    if (s) {
+      const [sx, sz] = s.position
+      const rotY = Math.atan2(-sx, -sz)
+      input.travelTarget = [sx + Math.sin(rotY) * 3.3, sz + Math.cos(rotY) * 3.3]
+    }
   }, [])
 
   const closePanel = useCallback(() => {
@@ -113,10 +120,17 @@ export function WorldExperience() {
         shadows
         dpr={[1, 1.5]}
         gl={{ antialias: true, powerPreference: "default" }}
-        camera={{ fov: 50, near: 0.1, far: 260, position: [0, 13, 17] }}
+        camera={{ fov: 52, near: 0.1, far: 200, position: [0, 8, 12] }}
       >
         <Suspense fallback={null}>
-          <Scene activeId={activeId} onProximity={handleProximity} onSelect={handleSelect} onInteract={handleInteract} />
+          <Scene
+            activeId={activeId}
+            focusId={pinnedId}
+            onProximity={handleProximity}
+            onSelect={handleSelect}
+            onInteract={handleInteract}
+            onReleaseFocus={() => setPinnedId(null)}
+          />
         </Suspense>
       </Canvas>
       <Loader
@@ -180,9 +194,10 @@ export function WorldExperience() {
           <TouchJoystick />
         ) : (
           <div className="absolute bottom-3 left-3 rounded-md border border-amber-200/70 bg-white/75 px-3 py-2 text-[11px] text-stone-600 shadow-sm backdrop-blur">
-            <span className="font-semibold text-stone-900">WASD / arrows</span> to move ·{" "}
-            <span className="font-semibold text-stone-900">Shift</span> to run ·{" "}
-            <span className="font-semibold text-stone-900">E</span> to pin a sign · walk up to any sign
+            <span className="font-semibold text-stone-900">WASD / arrows</span> move ·{" "}
+            <span className="font-semibold text-stone-900">Shift</span> run ·{" "}
+            <span className="font-semibold text-stone-900">E</span> focus on a board ·{" "}
+            <span className="font-semibold text-stone-900">Esc</span> step back
           </div>
         )}
 
@@ -289,16 +304,33 @@ function IntroOverlay({ onClose }: { onClose: () => void }) {
               fusion &amp; SLAM in a robotics lab, and research submitted to CoRL 2026 and a CVPR 2026 workshop.
             </p>
             <p className="mt-2 text-[13.5px] leading-relaxed text-stone-700">
-              This page is a small 3D world you can walk around — drive the robot up to any poster to read a résumé
-              point. Not in the mood? Skip straight to the text.
+              This résumé is laid out as a small plaza. Walk the robot up to a board to read each point — or skip it
+              and grab the text version.
             </p>
+
+            <div className="mt-3 rounded-lg border border-amber-200 bg-white/70 p-3 text-[12.5px] text-stone-700">
+              <p className="mb-1 font-bold text-stone-900">How to move around</p>
+              <ul className="space-y-0.5">
+                <li>
+                  <b>W A S D</b> or <b>arrow keys</b> — walk · hold <b>Shift</b> to run
+                </li>
+                <li>
+                  Walk up to a board and press <b>E</b> (or click it) — the camera turns to face the poster so you can
+                  read it
+                </li>
+                <li>
+                  Press <b>E</b> again, hit <b>Esc</b>, or walk away to step back
+                </li>
+                <li>On a phone: drag the on-screen stick, tap a board</li>
+              </ul>
+            </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
               <button
                 onClick={onClose}
                 className="rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-700"
               >
-                Enter the world →
+                Enter →
               </button>
               <Link
                 href="/cv"
@@ -315,7 +347,7 @@ function IntroOverlay({ onClose }: { onClose: () => void }) {
                 Résumé PDF ↗
               </a>
             </div>
-            <p className="mt-3 text-[11px] text-stone-500">WASD / arrows to move · walk up to a sign · Esc to close</p>
+            <p className="mt-3 text-[11px] text-stone-500">You can reopen this anytime with the ⓘ button.</p>
           </div>
         </div>
       </div>

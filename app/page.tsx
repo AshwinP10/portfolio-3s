@@ -2,9 +2,9 @@ import type { Metadata } from "next"
 import { WorldExperience } from "@/components/world/world-experience"
 
 export const metadata: Metadata = {
-  title: "Ashwin Prakash — Interactive Portfolio",
+  title: "Ashwin Prakash's Résumé",
   description:
-    "Drive a robot around a small 3D world to explore Ashwin Prakash's experience and projects. Prefer text? See /cv.",
+    "The résumé of Ashwin Prakash — ECE senior at UT Austin working in machine learning, computer vision, and robotics. Text version at /cv.",
 }
 
 export default function Home() {
@@ -18,7 +18,7 @@ export default function Home() {
         computer vision, and robotics
       </h1>
       <p className="sr-only">
-        This is an interactive 3D portfolio. <a href="/cv">View the text version</a> or{" "}
+        Ashwin Prakash&apos;s résumé, presented as a 3D plaza. <a href="/cv">View the text version</a> or{" "}
         <a href="/resume.pdf">download the résumé (PDF)</a>.
       </p>
       <WorldExperience />

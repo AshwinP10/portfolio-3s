@@ -191,7 +191,7 @@ export function Sign({ data, active, onSelect }: Props) {
               {data.subtitle}
             </span>
           )}
-          {active && <span className="mt-0.5 block text-[8px] font-bold text-slate-500">press E to pin ▸</span>}
+          {active && <span className="mt-0.5 block text-[8px] font-bold text-slate-500">press E to read ▸</span>}
         </div>
       </Html>
     </group>
