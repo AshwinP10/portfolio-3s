@@ -145,7 +145,7 @@ export function PalmTree({ position, scale = 1, lean = 0.12 }: { position: [numb
 
 /* ------------------------------------------------------------------ fountain */
 
-export function Fountain({ position }: { position: [number, number, number] }) {
+export function Fountain({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) {
   const water = useRef<THREE.Mesh>(null)
   const jet = useRef<THREE.Points>(null)
 
@@ -182,7 +182,7 @@ export function Fountain({ position }: { position: [number, number, number] }) {
   })
 
   return (
-    <group position={position}>
+    <group position={position} scale={scale}>
       <mesh position={[0, 0.22, 0]} receiveShadow castShadow>
         <cylinderGeometry args={[2.6, 2.9, 0.44, 32]} />
         <meshStandardMaterial color="#cbb083" roughness={0.9} />

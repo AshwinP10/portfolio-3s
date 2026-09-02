@@ -32,7 +32,7 @@ import {
 } from "./props"
 
 const ACTIVATE_RADIUS = 3.2
-const FOLLOW_OFFSET = new THREE.Vector3(0, 6.6, 11.5)
+const FOLLOW_OFFSET = new THREE.Vector3(0, 7.2, 12)
 const FOCUS_DIST = 7
 
 /** Y of each poster's centre — used to aim the focus camera. */
@@ -46,7 +46,7 @@ const POSTER_Y: Record<SignKind, number> = {
 
 const LAMPS: [number, number, number][] = Array.from({ length: 8 }, (_, i) => {
   const a = (i / 8) * Math.PI * 2 + 0.3
-  return [Math.cos(a) * 10, 0, Math.sin(a) * 10]
+  return [Math.cos(a) * 11.3, 0, Math.sin(a) * 11.3]
 })
 
 type Props = {
@@ -126,29 +126,44 @@ function Building({ position, size, color }: { position: [number, number, number
   )
 }
 
-function EntranceBanner() {
+function EntranceSign() {
   const tex = useMemo(() => bannerTexture(), [])
   return (
-    <group position={[0, 0, 10.5]}>
-      {[-4.3, 4.3].map((x) => (
+    <group position={[0, 0, 11.5]}>
+      {/* stone base on the ground */}
+      <mesh position={[0, 0.16, 0]} castShadow receiveShadow>
+        <boxGeometry args={[5.6, 0.32, 1.1]} />
+        <meshStandardMaterial color="#8a5a34" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 0.36, 0]}>
+        <boxGeometry args={[5.2, 0.12, 0.9]} />
+        <meshStandardMaterial color="#a9773f" roughness={0.85} />
+      </mesh>
+      {/* short end posts + finials */}
+      {[-2.55, 2.55].map((x) => (
         <group key={x} position={[x, 0, 0]}>
-          <mesh position={[0, 2.6, 0]} castShadow>
-            <cylinderGeometry args={[0.22, 0.28, 5.2, 10]} />
+          <mesh position={[0, 1, 0]} castShadow>
+            <boxGeometry args={[0.3, 1.5, 0.3]} />
             <meshStandardMaterial color="#5a3a24" roughness={0.9} />
           </mesh>
-          <mesh position={[0, 5.25, 0]} castShadow>
-            <sphereGeometry args={[0.26, 12, 12]} />
+          <mesh position={[0, 1.85, 0]} castShadow>
+            <sphereGeometry args={[0.17, 12, 12]} />
             <meshStandardMaterial color="#e0651f" roughness={0.5} />
           </mesh>
         </group>
       ))}
-      <mesh position={[0, 5.05, 0]} castShadow>
-        <boxGeometry args={[9.2, 0.4, 0.5]} />
-        <meshStandardMaterial color="#5a3a24" roughness={0.9} />
+      {/* sign board */}
+      <mesh position={[0, 1.16, 0]} castShadow>
+        <boxGeometry args={[4.9, 1.24, 0.16]} />
+        <meshStandardMaterial color="#5a3a24" roughness={0.85} />
       </mesh>
-      <mesh position={[0, 4.5, 0.02]}>
-        <planeGeometry args={[8.6, 1.85]} />
-        <meshBasicMaterial map={tex} toneMapped={false} side={THREE.DoubleSide} />
+      <mesh position={[0, 1.16, 0.1]}>
+        <planeGeometry args={[4.6, 1.0]} />
+        <meshBasicMaterial map={tex} toneMapped={false} />
+      </mesh>
+      <mesh position={[0, 1.16, -0.1]} rotation-y={Math.PI}>
+        <planeGeometry args={[4.6, 1.0]} />
+        <meshBasicMaterial map={tex} toneMapped={false} />
       </mesh>
     </group>
   )
@@ -165,31 +180,31 @@ function Plaza() {
   return (
     <group position={[0, 0, 0.5]}>
       <mesh rotation-x={-Math.PI / 2} position-y={0.02} receiveShadow>
-        <circleGeometry args={[9.6, 56]} />
+        <circleGeometry args={[10.6, 56]} />
         <meshStandardMaterial map={stone} roughness={0.95} />
       </mesh>
       <mesh rotation-x={-Math.PI / 2} position-y={0.03}>
-        <ringGeometry args={[9, 9.6, 56]} />
+        <ringGeometry args={[10, 10.6, 56]} />
         <meshStandardMaterial color="#c9752f" roughness={0.9} />
       </mesh>
       <mesh rotation-x={-Math.PI / 2} position-y={0.03}>
-        <ringGeometry args={[4.4, 4.9, 44]} />
+        <ringGeometry args={[4.9, 5.4, 44]} />
         <meshStandardMaterial color="#d98a4f" roughness={0.9} />
       </mesh>
       {spokes.map((a, i) => (
-        <group key={i} position={[Math.cos(a) * 6.7, 0.028, Math.sin(a) * 6.7]} rotation-y={-a}>
+        <group key={i} position={[Math.cos(a) * 7.6, 0.028, Math.sin(a) * 7.6]} rotation-y={-a}>
           <mesh rotation-x={-Math.PI / 2}>
-            <planeGeometry args={[4.6, 0.28]} />
+            <planeGeometry args={[4.8, 0.28]} />
             <meshStandardMaterial color="#b9884b" roughness={0.9} />
           </mesh>
         </group>
       ))}
       <mesh rotation-x={-Math.PI / 2} position-y={0.034}>
-        <circleGeometry args={[1.5, 28]} />
+        <circleGeometry args={[1.6, 28]} />
         <meshStandardMaterial color="#d98a4f" roughness={0.9} />
       </mesh>
       <mesh rotation-x={-Math.PI / 2} position-y={0.036}>
-        <ringGeometry args={[1.3, 1.5, 28]} />
+        <ringGeometry args={[1.4, 1.6, 28]} />
         <meshStandardMaterial color="#8a4f22" roughness={0.9} />
       </mesh>
     </group>
@@ -327,7 +342,7 @@ export function Scene({ activeId, focusId, onProximity, onSelect, onInteract, on
       <Path to={[-10, -5]} />
       <Path to={[11, -6]} />
       <Path to={[0, -11]} />
-      <EntranceBanner />
+      <EntranceSign />
 
       {/* zone floor markers */}
       {ZONES.map((zone) => (
@@ -354,30 +369,28 @@ export function Scene({ activeId, focusId, onProximity, onSelect, onInteract, on
             ] as [[number, number, number], [number, number, number]],
         )}
       />
-      <PapelPicado a={[-4.3, 4.8, 10.5]} b={[-6, 3.6, 5]} />
-      <PapelPicado a={[4.3, 4.8, 10.5]} b={[6, 3.6, 5]} />
-      <PapelPicado a={[-7, 3.4, 1.5]} b={[7, 3.4, 1.5]} colors={["#ff5d8f", "#ffd23f", "#2ec4b6", "#ff6b4a"]} />
+      <PapelPicado a={[-8, 4.4, 10.5]} b={[8, 4.4, 10.5]} />
+      <PapelPicado a={[-10, 4.1, -1]} b={[10, 4.1, -1]} colors={["#ff5d8f", "#ffd23f", "#2ec4b6", "#ff6b4a"]} />
 
-      {/* --- plaza furniture --- */}
-      <Fountain position={[6.5, 0, 5]} />
-      <Bench position={[-6.5, 0, 5]} rotation={-0.6} />
-      <Bench position={[0, 0, 8.5]} rotation={Math.PI} />
-      <Bench position={[-8, 0, -2]} rotation={1.1} />
-      <Bench position={[8, 0, -1]} rotation={-1.2} />
+      {/* --- plaza centrepiece: fountain, kept clear of everything else --- */}
+      <Fountain position={[0, 0, 6]} scale={1.3} />
+      <Bench position={[-6, 0, 5.5]} rotation={1.4} />
+      <Bench position={[6, 0, 5.5]} rotation={-1.4} />
+      <Bench position={[0, 0, 11]} rotation={Math.PI} />
+      <Bench position={[-8.5, 0, -2.5]} rotation={1.1} />
+      <Bench position={[8.5, 0, -1.5]} rotation={-1.2} />
 
-      <Planter position={[-5, 0, 8]} />
-      <Planter position={[5.5, 0, 8.5]} palm />
-      <Planter position={[-9.5, 0, 3.5]} />
-      <Planter position={[10, 0, 3]} palm />
-      <Planter position={[-2.5, 0, 6.5]} />
-      <Planter position={[3, 0, 5.5]} />
+      <Planter position={[-8, 0, 9]} />
+      <Planter position={[8, 0, 9]} palm />
+      <Planter position={[-10.5, 0, 4]} />
+      <Planter position={[11, 0, 3.5]} palm />
 
-      <Tree position={[-19, 0, -12]} scale={1.1} />
-      <Tree position={[19, 0, -13]} scale={1.15} />
+      <Tree position={[-20, 0, -12]} scale={1.1} />
+      <Tree position={[20, 0, -13]} scale={1.15} />
       <Tree position={[-11, 0, -16]} scale={1.05} />
       <Tree position={[8, 0, -17]} />
-      <Tree position={[22, 0, -3]} scale={1.1} />
-      <Tree position={[15, 0, 10]} />
+      <Tree position={[23, 0, -3]} scale={1.1} />
+      <Tree position={[16, 0, 11]} />
 
       {/* distant skyline */}
       {(
@@ -397,23 +410,23 @@ export function Scene({ activeId, focusId, onProximity, onSelect, onInteract, on
       {/* ===== personal-life props (unlabeled) ===== */}
 
       {/* Austin / live music */}
-      <DisplayPillar position={[-3.5, 0, 6]} height={1.3}>
+      <DisplayPillar position={[-8, 0, 6.5]} height={1.3}>
         <Guitar position={[0, 0, 0]} rotation={0.5} lean={-0.28} />
       </DisplayPillar>
-      <Armadillo position={[-2.6, 0, 6.9]} rotation={-1} />
+      <Armadillo position={[-7, 0, 7.4]} rotation={-1} />
 
       {/* food market: mangos + tacos */}
-      <MarketStall position={[7.5, 0, 7]} rotation={-2.4} awning={["#e14b4b", "#f4e3c1"]}>
+      <MarketStall position={[10, 0, 7.5]} rotation={-2.4} awning={["#e14b4b", "#f4e3c1"]}>
         <MangoBasket position={[-0.7, 0, 0]} />
         <TacoPlate position={[0.7, 0.1, 0.1]} />
         <MangoBasket position={[0.2, 0, -0.35]} />
       </MarketStall>
 
       {/* sports: basketball + Celtics */}
-      <MarketStall position={[-7.5, 0, 7.5]} rotation={2.5} awning={["#007a33", "#f4f4f4"]}>
+      <MarketStall position={[-10, 0, 8]} rotation={2.5} awning={["#007a33", "#f4f4f4"]}>
         <BasketballStand position={[-0.6, 0.05, 0]} />
       </MarketStall>
-      <Pennant position={[-9, 0, 6.5]} color="#007a33" emblem="shamrock" rotation={0.6} />
+      <Pennant position={[-11.5, 0, 6.5]} color="#007a33" emblem="shamrock" rotation={0.6} />
 
       {/* UT Longhorns */}
       <Pennant position={[3.5, 0, -9]} color="#bf5700" emblem="horns" rotation={-0.3} />
