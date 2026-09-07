@@ -1,74 +1,35 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Menu, X, Cpu } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useTheme } from "next-themes"
+import { ArrowUpRight, Menu, Moon, Sun, X } from "lucide-react"
+
+const sections = ["projects", "experience", "about", "contact"]
 
 export function Navigation() {
-  const [isOpen, setIsOpen] = useState(false)
-
-  const navItems = [
-    { name: "About", href: "#about" },
-    { name: "Experience", href: "#experience" },
-    { name: "Projects", href: "#projects" },
-    { name: "Skills", href: "#skills" },
-    { name: "Contact", href: "#contact" },
-    { name: "Resume", href: "/resume.pdf" },
-    { name: "3D World", href: "/" },
-  ]
-
+  const [open, setOpen] = useState(false)
+  const [active, setActive] = useState("")
+  const [mounted, setMounted] = useState(false)
+  const { resolvedTheme, setTheme } = useTheme()
+  useEffect(() => {
+    setMounted(true)
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) if (entry.isIntersecting) setActive(entry.target.id)
+    }, { rootMargin: "-15% 0px -55% 0px" })
+    for (const id of sections) { const element = document.getElementById(id); if (element) observer.observe(element) }
+    return () => observer.disconnect()
+  }, [])
+  useEffect(() => {
+    const close = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false) }
+    window.addEventListener("keydown", close)
+    return () => window.removeEventListener("keydown", close)
+  }, [])
+  const isLight = mounted && resolvedTheme === "light"
   return (
-    <nav className="fixed top-0 w-full bg-background/95 backdrop-blur-md border-b border-border z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <a href="/" className="font-bold text-xl text-primary flex items-center gap-2">
-            <Cpu className="h-6 w-6" />
-            <span className="gradient-text">AP</span>
-          </a>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-8">
-            {navItems.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                target={item.name === "Resume" ? "_blank" : undefined}
-                rel={item.name === "Resume" ? "noopener noreferrer" : undefined}
-                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
-              >
-                {item.name}
-              </a>
-            ))}
-          </div>
-
-          {/* Mobile Navigation Button */}
-          <div className="md:hidden">
-            <Button variant="ghost" size="sm" onClick={() => setIsOpen(!isOpen)} className="text-primary">
-              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation Menu */}
-        {isOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-background border-t border-border">
-              {navItems.map((item) => (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  target={item.name === "Resume" ? "_blank" : undefined}
-                  rel={item.name === "Resume" ? "noopener noreferrer" : undefined}
-                  className="block px-3 py-2 text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item.name}
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </nav>
+    <header className="site-header"><nav className="section-shell nav-inner" aria-label="Main navigation">
+      <a className="wordmark" href="#home" aria-label="Ashwin Prakash, home" onClick={() => setOpen(false)}>ap<span>.</span></a>
+      <div id="nav-links" className={open ? "nav-links is-open" : "nav-links"}>{sections.map((section) => <a key={section} href={"#" + section} aria-current={active === section ? "location" : undefined} onClick={() => setOpen(false)}>{section === "projects" ? "Work" : section[0].toUpperCase() + section.slice(1)}</a>)}</div>
+      <div className="nav-actions"><button className="icon-button" aria-label={isLight ? "Switch to dark theme" : "Switch to light theme"} onClick={() => setTheme(isLight ? "dark" : "light")}>{isLight ? <Moon size={18} /> : <Sun size={18} />}</button><a className="nav-resume" href="/resume.pdf" target="_blank" rel="noopener noreferrer">Résumé <ArrowUpRight size={16} /></a><button className="icon-button menu-toggle" aria-label={open ? "Close navigation" : "Open navigation"} aria-expanded={open} aria-controls="nav-links" onClick={() => setOpen(!open)}>{open ? <X size={21} /> : <Menu size={21} />}</button></div>
+    </nav></header>
   )
 }

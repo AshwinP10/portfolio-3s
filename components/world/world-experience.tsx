@@ -1,411 +1,200 @@
 "use client"
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { Suspense, useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
+import * as Dialog from "@radix-ui/react-dialog"
 import { Canvas } from "@react-three/fiber"
-import { Loader } from "@react-three/drei"
+import { PerformanceMonitor } from "@react-three/drei"
+import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, HelpCircle, Pause, Play, X } from "lucide-react"
 import { Scene } from "./scene"
-import { SIGNS, TRAVEL, COLORS } from "./world-data"
-import { input, useKeyboardControls } from "./controls"
+import { SIGNS, TRAVEL } from "./world-data"
+import { input, resetInput, useKeyboardControls } from "./controls"
+import { parseQuality, renderingBudget, TOUR, type Quality } from "@/lib/world-settings"
+import { WorldFallback } from "./world-fallback"
 
-const SKY = "#f6c9a0"
-
-function hasWebGL() {
+function hasWebGL2() {
   try {
-    const c = document.createElement("canvas")
-    return !!(window.WebGLRenderingContext && (c.getContext("webgl") || c.getContext("experimental-webgl")))
-  } catch {
-    return false
-  }
+    const canvas = document.createElement("canvas")
+    const context = canvas.getContext("webgl2")
+    if (!context) return false
+    context.getExtension("WEBGL_lose_context")?.loseContext()
+    return true
+  } catch { return false }
 }
 
 export function WorldExperience() {
   const [mounted, setMounted] = useState(false)
   const [webgl, setWebgl] = useState(true)
   const [coarse, setCoarse] = useState(false)
-  const [showIntro, setShowIntro] = useState(true)
-
+  const [lowPower, setLowPower] = useState(false)
+  const [quality, setQuality] = useState<Quality>("auto")
+  const [help, setHelp] = useState(false)
+  const [paused, setPaused] = useState(false)
+  const [hidden, setHidden] = useState(false)
+  const [ready, setReady] = useState(false)
   const [proximityId, setProximityId] = useState<string | null>(null)
   const [pinnedId, setPinnedId] = useState<string | null>(null)
   const [dismissedId, setDismissedId] = useState<string | null>(null)
+  const [tourIndex, setTourIndex] = useState<number | null>(null)
+  const panelRef = useRef<HTMLElement>(null)
+  const contextCleanup = useRef<(() => void) | null>(null)
+  const budget = renderingBudget(quality, lowPower)
+  const running = !paused && !help && !hidden
+  useKeyboardControls(running)
 
-  useKeyboardControls()
-
-  useEffect(() => {
-    setMounted(true)
-    setWebgl(hasWebGL())
-    setCoarse(window.matchMedia?.("(pointer: coarse)").matches ?? false)
-    try {
-      if (sessionStorage.getItem("ap-intro-seen") === "1") setShowIntro(false)
-    } catch {
-      /* ignore */
-    }
-  }, [])
-
-  const closeIntro = useCallback(() => {
-    setShowIntro(false)
-    try {
-      sessionStorage.setItem("ap-intro-seen", "1")
-    } catch {
-      /* ignore */
-    }
-  }, [])
-
-  const activeId = pinnedId ?? (proximityId && proximityId !== dismissedId ? proximityId : null)
-  const sign = useMemo(() => SIGNS.find((s) => s.id === activeId) ?? null, [activeId])
-
-  const handleProximity = useCallback((id: string | null) => {
-    setProximityId(id)
-    setDismissedId(null)
-  }, [])
-
-  const handleInteract = useCallback(() => {
-    setProximityId((pid) => {
-      setPinnedId((cur) => (cur ? null : pid))
-      return pid
-    })
-  }, [])
-
-  const handleSelect = useCallback((id: string) => {
+  const select = useCallback((id: string) => {
+    const sign = SIGNS.find((item) => item.id === id)
+    if (!sign) return
     setPinnedId(id)
     setDismissedId(null)
-    // walk the robot over to stand in front of that board
-    const s = SIGNS.find((x) => x.id === id)
-    if (s) {
-      const [sx, sz] = s.position
-      const rotY = Math.atan2(-sx, -sz)
-      input.travelTarget = [sx + Math.sin(rotY) * 3.3, sz + Math.cos(rotY) * 3.3]
-    }
+    const [x, z] = sign.position
+    const rotation = Math.atan2(-x, -z)
+    input.travelTarget = [x + Math.sin(rotation) * 3.3, z + Math.cos(rotation) * 3.3]
   }, [])
 
+  useEffect(() => {
+    setWebgl(hasWebGL2())
+    setMounted(true)
+    const touch = window.matchMedia("(pointer: coarse)")
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)")
+    const preferences = () => {
+      setCoarse(touch.matches)
+      setLowPower(touch.matches || motion.matches || navigator.hardwareConcurrency <= 4)
+    }
+    preferences()
+    setPaused(motion.matches)
+    touch.addEventListener("change", preferences)
+    motion.addEventListener("change", preferences)
+    try { setQuality(parseQuality(localStorage.getItem("ap-world-quality"))) } catch { /* Storage is optional. */ }
+    const project = new URLSearchParams(window.location.search).get("project")
+    if (project) select(project)
+    const visibility = () => { setHidden(document.hidden); if (document.hidden) resetInput() }
+    visibility()
+    document.addEventListener("visibilitychange", visibility)
+    return () => {
+      touch.removeEventListener("change", preferences)
+      motion.removeEventListener("change", preferences)
+      document.removeEventListener("visibilitychange", visibility)
+      contextCleanup.current?.()
+      resetInput()
+    }
+  }, [select])
+
+  const activeId = pinnedId ?? (proximityId !== dismissedId ? proximityId : null)
+  const sign = SIGNS.find((item) => item.id === activeId)
   const closePanel = useCallback(() => {
-    if (pinnedId) setPinnedId(null)
-    else setDismissedId(proximityId)
-  }, [pinnedId, proximityId])
+    setPinnedId(null)
+    setDismissedId(proximityId)
+    setTourIndex(null)
+    input.travelTarget = null
+  }, [proximityId])
+  const interact = useCallback(() => {
+    if (pinnedId) closePanel()
+    else if (proximityId) select(proximityId)
+  }, [closePanel, pinnedId, proximityId, select])
+  const proximity = useCallback((id: string | null) => { setProximityId(id); setDismissedId(null) }, [])
+  const releaseFocus = useCallback(() => { setPinnedId(null); setTourIndex(null) }, [])
 
   useEffect(() => {
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return
-      if (showIntro) closeIntro()
-      else closePanel()
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !help) closePanel()
     }
-    window.addEventListener("keydown", onEsc)
-    return () => window.removeEventListener("keydown", onEsc)
-  }, [closePanel, closeIntro, showIntro])
+    window.addEventListener("keydown", escape)
+    return () => window.removeEventListener("keydown", escape)
+  }, [closePanel, help])
 
-  if (!mounted) {
-    return (
-      <div className="fixed inset-0 grid place-items-center text-stone-600" style={{ background: SKY }}>
-        Loading world…
-      </div>
-    )
+  const travel = (index: number) => {
+    setTourIndex(index)
+    setPaused(false)
+    select(TOUR[index])
+  }
+  const updateQuality = (value: string) => {
+    const next = parseQuality(value)
+    setQuality(next)
+    try { localStorage.setItem("ap-world-quality", next) } catch { /* Storage is optional. */ }
   }
 
-  if (!webgl) {
-    return (
-      <div className="fixed inset-0 grid place-items-center px-6 text-center" style={{ background: SKY }}>
-        <div>
-          <p className="mb-3 text-stone-800">This 3D portfolio needs WebGL, which isn&apos;t available here.</p>
-          <Link href="/cv" className="font-semibold text-orange-800 underline">
-            View the text version →
-          </Link>
-        </div>
-      </div>
-    )
-  }
+  if (!mounted) return <WorldFallback />
+  if (!webgl) return <WorldFallback failed />
 
   return (
-    <div className="fixed inset-0 overflow-hidden" style={{ background: SKY }}>
-      <Canvas
-        shadows
-        dpr={[1, 1.5]}
-        gl={{ antialias: true, powerPreference: "default" }}
-        camera={{ fov: 52, near: 0.1, far: 200, position: [0, 8, 12] }}
-      >
-        <Suspense fallback={null}>
-          <Scene
-            activeId={activeId}
-            focusId={pinnedId}
-            onProximity={handleProximity}
-            onSelect={handleSelect}
-            onInteract={handleInteract}
-            onReleaseFocus={() => setPinnedId(null)}
-          />
-        </Suspense>
-      </Canvas>
-      <Loader
-        containerStyles={{ background: SKY }}
-        barStyles={{ background: "#e0651f" }}
-        dataStyles={{ color: "#44290f", fontSize: "12px" }}
-      />
-
-      {/* ---------------- HUD ---------------- */}
-      <div className="pointer-events-none absolute inset-0 z-40 select-none">
-        {/* name card */}
-        <div className="pointer-events-auto absolute left-3 top-3 flex items-center gap-2 rounded-lg border border-amber-200/70 bg-white/85 px-3 py-2 shadow-md backdrop-blur">
-          <div>
-            <p className="text-sm font-bold text-stone-900">Ashwin Prakash</p>
-            <p className="text-[11px] text-stone-600">ECE Senior · UT Austin · ML / CV / Robotics</p>
-          </div>
-          <button
-            onClick={() => setShowIntro(true)}
-            className="ml-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 hover:bg-amber-100"
-            title="About Ashwin"
-          >
-            ⓘ
-          </button>
-        </div>
-
-        {/* top-right actions */}
-        <div className="pointer-events-auto absolute right-3 top-3 flex gap-2">
-          <a
-            href="/resume.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-md bg-orange-600 px-3 py-2 text-xs font-semibold text-white shadow-md hover:bg-orange-700"
-          >
-            Résumé PDF
-          </a>
-          <Link
-            href="/cv"
-            className="rounded-md border border-stone-300 bg-white/85 px-3 py-2 text-xs font-semibold text-stone-700 shadow-md backdrop-blur hover:bg-white"
-          >
-            Text version
-          </Link>
-        </div>
-
-        {/* fast-travel chips */}
-        <div className="pointer-events-auto absolute left-1/2 top-3 flex -translate-x-1/2 flex-wrap justify-center gap-1.5">
-          {TRAVEL.map((t) => (
-            <button
-              key={t.label}
-              onClick={() => {
-                input.travelTarget = t.position
-              }}
-              className="rounded-full border border-stone-300 bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-stone-700 shadow-sm backdrop-blur hover:bg-white"
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        {/* controls hint / joystick */}
-        {coarse ? (
-          <TouchJoystick />
-        ) : (
-          <div className="absolute bottom-3 left-3 rounded-md border border-amber-200/70 bg-white/75 px-3 py-2 text-[11px] text-stone-600 shadow-sm backdrop-blur">
-            <span className="font-semibold text-stone-900">WASD / arrows</span> move ·{" "}
-            <span className="font-semibold text-stone-900">Shift</span> run ·{" "}
-            <span className="font-semibold text-stone-900">E</span> focus on a board ·{" "}
-            <span className="font-semibold text-stone-900">Esc</span> step back
-          </div>
-        )}
-
-        {/* info panel */}
-        {sign && (
-          <div className="pointer-events-auto absolute bottom-0 left-1/2 z-50 w-[min(560px,94vw)] -translate-x-1/2 rounded-t-2xl border border-stone-200 bg-white/95 p-4 shadow-2xl backdrop-blur sm:bottom-4 sm:rounded-2xl">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: COLORS[sign.kind] }} />
-                  <h2 className="text-base font-bold text-stone-900">{sign.title}</h2>
-                </div>
-                {sign.subtitle && <p className="text-xs font-medium text-orange-700">{sign.subtitle}</p>}
-                {sign.meta && <p className="text-[11px] text-stone-500">{sign.meta}</p>}
-              </div>
-              <button
-                onClick={closePanel}
-                aria-label="Close"
-                className="rounded-md px-2 py-1 text-stone-400 hover:bg-stone-100 hover:text-stone-700"
-              >
-                ✕
-              </button>
-            </div>
-
-            <ul className="mt-2 max-h-[28vh] space-y-1.5 overflow-y-auto pr-1">
-              {sign.bullets.map((b, i) => (
-                <li key={i} className="text-[13px] leading-snug text-stone-700">
-                  • {b}
-                </li>
-              ))}
-            </ul>
-
-            {sign.tags && sign.tags.length > 0 && (
-              <div className="mt-2.5 flex flex-wrap gap-1.5">
-                {sign.tags.map((t) => (
-                  <span
-                    key={t}
-                    className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-800"
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {sign.links && sign.links.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {sign.links.map((l) => (
-                  <a
-                    key={l.label}
-                    href={l.href}
-                    target={l.href.startsWith("/") || l.href.startsWith("mailto:") ? undefined : "_blank"}
-                    rel="noopener noreferrer"
-                    className="rounded-md bg-orange-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-700"
-                  >
-                    {l.label} ↗
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {showIntro && <IntroOverlay onClose={closeIntro} />}
-    </div>
-  )
-}
-
-function IntroOverlay({ onClose }: { onClose: () => void }) {
-  return (
-    <div
-      className="pointer-events-auto absolute inset-0 z-[100] grid place-items-center bg-stone-900/55 p-4 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="relative w-[min(680px,96vw)] overflow-hidden rounded-2xl border border-amber-200 bg-[#fff8ef] shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="h-2 w-full bg-gradient-to-r from-orange-400 via-rose-400 to-violet-500" />
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute right-3 top-4 rounded-md px-2 py-1 text-stone-400 hover:bg-stone-100 hover:text-stone-700"
+    <div className="world-screen">
+      <div className="world-canvas" aria-hidden="true">
+        <Canvas
+          shadows={budget.shadows}
+          dpr={budget.dpr}
+          frameloop={running ? "always" : "demand"}
+          gl={{ antialias: false, powerPreference: "default" }}
+          camera={{ fov: 52, near: 0.1, far: 120, position: [0, 8, 12] }}
+          fallback={<WorldFallback failed />}
+          onCreated={({ gl }) => {
+            const lost = (event: Event) => { event.preventDefault(); setWebgl(false) }
+            gl.domElement.addEventListener("webglcontextlost", lost)
+            contextCleanup.current = () => gl.domElement.removeEventListener("webglcontextlost", lost)
+            setReady(true)
+          }}
         >
-          ✕
-        </button>
-
-        <div className="flex flex-col gap-5 p-6 sm:flex-row sm:p-7">
-          <img
-            src="/images/ashwin-headshot.jpg"
-            alt="Ashwin Prakash"
-            className="h-28 w-28 shrink-0 self-center rounded-2xl object-cover object-[center_20%] shadow-md ring-2 ring-amber-200 sm:h-40 sm:w-40 sm:self-start"
-          />
-          <div className="min-w-0">
-            <h2 className="text-xl font-extrabold text-stone-900">Ashwin Prakash</h2>
-            <p className="text-sm font-semibold text-orange-700">
-              ECE Senior · UT Austin · Machine Learning, Computer Vision &amp; Robotics
-            </p>
-            <p className="mt-3 text-[13.5px] leading-relaxed text-stone-700">
-              Hey — I&apos;m a senior in Electrical &amp; Computer Engineering at UT Austin (Robotics minor, GPA 3.7,
-              graduating May 2027). I work across machine learning, computer vision, and robotics: computer-vision
-              pipelines and serverless infrastructure at Amazon, an NVIDIA Isaac Sim boat simulator at Saronic, sensor
-              fusion &amp; SLAM in a robotics lab, and research submitted to CoRL 2026 and a CVPR 2026 workshop.
-            </p>
-            <p className="mt-2 text-[13.5px] leading-relaxed text-stone-700">
-              This résumé is laid out as a small plaza. Walk the robot up to a board to read each point — or skip it
-              and grab the text version.
-            </p>
-
-            <div className="mt-3 rounded-lg border border-amber-200 bg-white/70 p-3 text-[12.5px] text-stone-700">
-              <p className="mb-1 font-bold text-stone-900">How to move around</p>
-              <ul className="space-y-0.5">
-                <li>
-                  <b>W A S D</b> or <b>arrow keys</b> — walk · hold <b>Shift</b> to run
-                </li>
-                <li>
-                  Walk up to a board and press <b>E</b> (or click it) — the camera turns to face the poster so you can
-                  read it
-                </li>
-                <li>
-                  Press <b>E</b> again, hit <b>Esc</b>, or walk away to step back
-                </li>
-                <li>On a phone: drag the on-screen stick, tap a board</li>
-              </ul>
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button
-                onClick={onClose}
-                className="rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-700"
-              >
-                Enter →
-              </button>
-              <Link
-                href="/cv"
-                className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
-              >
-                Text résumé
-              </Link>
-              <a
-                href="/resume.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
-              >
-                Résumé PDF ↗
-              </a>
-            </div>
-            <p className="mt-3 text-[11px] text-stone-500">You can reopen this anytime with the ⓘ button.</p>
-          </div>
-        </div>
+          <Suspense fallback={null}>
+            {quality === "auto" && <PerformanceMonitor onDecline={() => setLowPower(true)} />}
+            <Scene activeId={activeId} focusId={pinnedId} onProximity={proximity} onSelect={select} onInteract={interact} onReleaseFocus={releaseFocus} quality={budget.mode} shadowSize={budget.shadowSize} />
+          </Suspense>
+        </Canvas>
       </div>
+      {!ready && <p className="world-loading" role="status">Preparing the plaza…</p>}
+      <header className="world-header">
+        <Link className="world-home" href="/"><ArrowLeft size={18} /><span>Ashwin Prakash<small>The interactive portfolio</small></span></Link>
+        <div className="world-header-actions">
+          <label className="quality-control"><span>Graphics</span><select aria-label="Graphics quality" value={quality} onChange={(event) => updateQuality(event.target.value)}><option value="auto">Auto</option><option value="high">High</option><option value="battery">Battery saver</option></select></label>
+          <button className="world-icon" aria-label={paused ? "Resume world" : "Pause world"} aria-pressed={paused} onClick={() => setPaused(!paused)}>{paused ? <Play size={18} /> : <Pause size={18} />}</button>
+          <button className="world-icon" aria-label="World controls and help" onClick={() => setHelp(true)}><HelpCircle size={19} /></button>
+          <Link href="/cv" className="world-text-link"><BookOpen size={17} /><span>Read portfolio</span></Link>
+        </div>
+      </header>
+      <nav className="world-toolbar" aria-label="Explore the world">
+        <div className="world-travel">{TRAVEL.map((destination) => <button key={destination.label} onClick={() => { closePanel(); setPaused(false); input.travelTarget = destination.position }}>{destination.label}</button>)}</div>
+        <label className="world-directory"><span className="sr-only">Jump to any project or experience</span><select value={pinnedId ?? ""} onChange={(event) => { if (event.target.value) { setPaused(false); setTourIndex(null); select(event.target.value) } }}><option value="">Jump to a story…</option>{(["experience", "project", "about", "contact", "resume"] as const).map((kind) => <optgroup label={kind === "project" ? "Projects" : kind[0].toUpperCase() + kind.slice(1)} key={kind}>{SIGNS.filter((item) => item.kind === kind).map((item) => <option value={item.id} key={item.id}>{item.title}</option>)}</optgroup>)}</select></label>
+        <button className="world-tour-button" onClick={() => tourIndex === null ? travel(0) : closePanel()}>{tourIndex === null ? "Take a guided tour" : "End tour"} <ArrowRight size={16} /></button>
+      </nav>
+      {paused && <div className="world-paused"><p>Take your time.</p><button onClick={() => setPaused(false)}><Play size={17} /> Resume exploring</button></div>}
+      {sign && <aside className="world-panel" ref={panelRef} aria-labelledby="world-panel-title">
+        {tourIndex !== null && <div className="tour-progress"><span>GUIDED TOUR</span><span>{tourIndex + 1} / {TOUR.length}</span><progress value={tourIndex + 1} max={TOUR.length} aria-label="Guided tour progress" /></div>}
+        <button className="world-icon world-panel-close" onClick={closePanel} aria-label="Close story"><X size={19} /></button>
+        <p className="eyebrow">{sign.kind}</p><h2 id="world-panel-title">{sign.title}</h2>
+        <p className="world-panel-subtitle">{sign.subtitle}</p>{sign.meta && <p className="world-panel-meta">{sign.meta}</p>}
+        <ul>{sign.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul>
+        <div className="tag-list">{sign.tags?.map((tag) => <span key={tag}>{tag}</span>)}</div>
+        <div className="world-panel-links">{sign.links?.map((link) => <a key={link.href} href={link.href} target={link.href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer">{link.label} <ArrowUpRight size={15} /></a>)}</div>
+        {tourIndex !== null && <div className="tour-navigation"><button disabled={tourIndex === 0} onClick={() => travel(tourIndex - 1)}><ArrowLeft size={17} /> Previous</button><button onClick={() => tourIndex === TOUR.length - 1 ? closePanel() : travel(tourIndex + 1)}>{tourIndex === TOUR.length - 1 ? "Finish tour" : "Next stop"} <ArrowRight size={17} /></button></div>}
+      </aside>}
+      {coarse && running ? <TouchJoystick /> : <div className="world-control-hint"><span><kbd>WASD</kbd> / <kbd>↑↓←→</kbd> Move</span><span><kbd>Shift</kbd> Run</span><span><kbd>E</kbd> Read</span><span><kbd>Esc</kbd> Close</span></div>}
+      <Dialog.Root open={help} onOpenChange={setHelp}><Dialog.Portal><Dialog.Overlay className="dialog-overlay" /><Dialog.Content className="project-dialog world-help"><Dialog.Close className="icon-button dialog-close" aria-label="Close help"><X size={21} /></Dialog.Close><p className="eyebrow">WELCOME TO THE PLAZA</p><Dialog.Title>Follow your curiosity.</Dialog.Title><Dialog.Description>Meet the projects and experiences behind my work, one stop at a time.</Dialog.Description><ul><li>Use WASD or arrow keys to walk. Hold Shift to run.</li><li>Click a board or press E nearby to read its story.</li><li>On touch screens, drag the joystick to move.</li><li>Use “Jump to a story” for direct access, or take the guided tour.</li><li>Press Escape to close a story. Pause anytime; Battery saver lowers the graphics workload.</li></ul><div className="dialog-actions"><Dialog.Close className="action action-primary">Let’s explore <ArrowRight size={17} /></Dialog.Close><Link className="action action-outline" href="/cv">Read portfolio</Link><a className="action action-outline" href="/resume.pdf">Résumé PDF</a></div></Dialog.Content></Dialog.Portal></Dialog.Root>
     </div>
   )
 }
 
 function TouchJoystick() {
   const base = useRef<HTMLDivElement>(null)
+  const pointer = useRef<number | null>(null)
   const [knob, setKnob] = useState({ x: 0, y: 0 })
-
   const move = (clientX: number, clientY: number) => {
-    const el = base.current
-    if (!el) return
-    const r = el.getBoundingClientRect()
-    const cx = r.left + r.width / 2
-    const cy = r.top + r.height / 2
-    const max = r.width / 2
-    let dx = clientX - cx
-    let dy = clientY - cy
-    const d = Math.hypot(dx, dy)
-    if (d > max) {
-      dx = (dx / d) * max
-      dy = (dy / d) * max
-    }
-    setKnob({ x: dx, y: dy })
+    const element = base.current
+    if (!element) return
+    const bounds = element.getBoundingClientRect()
+    const max = bounds.width / 2
+    let x = clientX - bounds.left - max
+    let y = clientY - bounds.top - max
+    const distance = Math.hypot(x, y)
+    if (distance > max) { x *= max / distance; y *= max / distance }
+    setKnob({ x, y })
     input.touchActive = true
-    input.touchX = dx / max
-    input.touchY = dy / max
+    input.touchX = x / max
+    input.touchY = y / max
     input.travelTarget = null
   }
-
-  const end = () => {
-    setKnob({ x: 0, y: 0 })
-    input.touchActive = false
-    input.touchX = 0
-    input.touchY = 0
-  }
-
-  return (
-    <div
-      ref={base}
-      className="pointer-events-auto absolute bottom-6 left-6 h-32 w-32 touch-none rounded-full border border-white/70 bg-white/40 shadow-lg backdrop-blur"
-      onPointerDown={(e) => {
-        ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
-        move(e.clientX, e.clientY)
-      }}
-      onPointerMove={(e) => {
-        if (e.buttons > 0 || (e as unknown as PointerEvent).pressure > 0) move(e.clientX, e.clientY)
-      }}
-      onPointerUp={end}
-      onPointerCancel={end}
-      onLostPointerCapture={end}
-    >
-      <div
-        className="pointer-events-none absolute left-1/2 top-1/2 h-14 w-14 rounded-full border border-white bg-orange-500/80 shadow-md"
-        style={{ transform: `translate(-50%,-50%) translate(${knob.x}px, ${knob.y}px)` }}
-      />
-    </div>
-  )
+  const end = () => { pointer.current = null; setKnob({ x: 0, y: 0 }); input.touchActive = false; input.touchX = 0; input.touchY = 0 }
+  useEffect(() => () => { input.touchActive = false; input.touchX = 0; input.touchY = 0 }, [])
+  return <div ref={base} className="world-joystick" role="group" aria-label="Drag to move the robot. You can also use the story selector."
+    onPointerDown={(event) => { if (pointer.current !== null) return; pointer.current = event.pointerId; event.currentTarget.setPointerCapture(event.pointerId); move(event.clientX, event.clientY) }}
+    onPointerMove={(event) => { if (pointer.current === event.pointerId) move(event.clientX, event.clientY) }}
+    onPointerUp={end} onPointerCancel={end} onLostPointerCapture={end}><span style={{ transform: "translate(-50%,-50%) translate(" + knob.x + "px," + knob.y + "px)" }} /></div>
 }

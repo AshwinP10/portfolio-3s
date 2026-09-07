@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { useFrame } from "@react-three/fiber"
 import { Html } from "@react-three/drei"
 import * as THREE from "three"
@@ -33,6 +33,7 @@ export function Sign({ data, active, onSelect }: Props) {
       }),
     [data.id, data.title, data.subtitle, color],
   )
+  useEffect(() => () => tex.dispose(), [tex])
 
   useFrame((state, dt) => {
     if (group.current) {
@@ -181,17 +182,16 @@ export function Sign({ data, active, onSelect }: Props) {
           }`}
         >
           <span
-            className="block rounded-full px-2 py-0.5 text-[10px] font-bold leading-tight text-white"
-            style={{ background: color }}
+            className="block rounded-md bg-white/95 px-2 py-1 text-sm font-semibold leading-tight text-stone-900"
           >
             {data.title}
           </span>
           {active && data.subtitle && (
-            <span className="mt-0.5 block px-1 text-[8px] font-semibold leading-tight text-slate-700">
+            <span className="mt-1 block px-1 text-xs font-medium leading-snug text-slate-700">
               {data.subtitle}
             </span>
           )}
-          {active && <span className="mt-0.5 block text-[8px] font-bold text-slate-500">press E to read ▸</span>}
+          {active && <span className="mt-1 block text-xs font-medium text-slate-600">Press E to read</span>}
         </div>
       </Html>
     </group>

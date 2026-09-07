@@ -1,30 +1,42 @@
-# Portfolio from resume
+# Ashwin Prakash — Portfolio
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+A Next.js portfolio for machine learning, computer vision, and robotics work. The homepage is a readable, server-rendered portfolio; the interactive Three.js plaza lives at `/world`.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/ashwin-prakashs-projects/v0-portfolio-from-resume)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/zQNV0xSY2my)
+## Experiences
 
-## Overview
+- `/`: project catalog with field filters, technology search, accessible project dialogs, experience timeline, skills, contact links, and an on-demand résumé preview.
+- `/cv`: the same complete portfolio, preserving the existing résumé route.
+- `/world`: the original robot and plaza with a guided tour, direct story navigation, touch controls, pause/resume, and saved graphics settings.
+- `/world?project=davatar`: an example direct link to a project in the plaza.
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+Portfolio facts, project details, and world destinations are shared through `components/world/world-data.ts`. `lib/projects.ts` adds display summaries and categories without duplicating the underlying experience or research details.
 
-## Deployment
+## Development
 
-Your project is live at:
+Use Node.js 24 and pnpm. The existing dependency versions and lockfile are preserved.
 
-**[https://vercel.com/ashwin-prakashs-projects/v0-portfolio-from-resume](https://vercel.com/ashwin-prakashs-projects/v0-portfolio-from-resume)**
+```sh
+pnpm install --frozen-lockfile
+pnpm dev
+pnpm test
+pnpm run typecheck
+pnpm build
+```
 
-## Build your app
+Tests use Node’s built-in TypeScript support and test runner. They cover catalog completeness, search and filter behavior, world deep links, graphics preferences, and guided-tour integrity. The GitHub verification workflow runs tests, TypeScript checking, and the production build for pull requests and changes to `main`.
 
-Continue building your app on:
+## Performance choices
 
-**[https://v0.app/chat/projects/zQNV0xSY2my](https://v0.app/chat/projects/zQNV0xSY2my)**
+- The homepage does not import the WebGL runtime. Links to `/world` disable Next.js prefetch so Three.js loads when a visitor chooses the world.
+- Static portfolio sections render on the server. Client code is limited to interactions and the world.
+- The existing portrait uses Next Image with responsive sizes, priority loading, and AVIF/WebP optimization. Geist is served from the installed font package instead of fetching Google Fonts at build time.
+- The PDF iframe mounts only after “Preview résumé” is selected.
+- Automatic graphics cap pixel ratio at 1.25 and use 1024px shadow maps. High uses a 1.5 cap and 1536px shadows. Battery saver uses pixel ratio 1 and disables shadows and optional point lights. Automatic mode selects the lower budget on coarse-pointer, reduced-motion, or low-core devices and lowers it when frame performance declines.
+- The render loop pauses while the tab is hidden, help is open, or the visitor pauses. Reduced-motion visitors start paused and can resume explicitly.
+- Generated textures are disposed when the world unmounts. Camera time steps are clamped to prevent large jumps after a pause.
 
-## How It Works
+These changes reduce startup work and rendering budgets. Real-world latency and Core Web Vitals still need measurement against a deployed preview; no benchmark scores are claimed.
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+## Accessibility and fallbacks
+
+Navigation and filters work with keyboard and touch. Project and help dialogs use Radix focus management, Escape dismissal, and focus restoration. Movement keys yield to buttons, links, selects, and editable fields. Theme choice persists locally; clipboard failures retain a usable email link. Reduced motion is respected by page transitions. WebGL2 failure or context loss exposes the complete text portfolio and PDF instead of trapping visitors on a loading screen.

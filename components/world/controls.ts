@@ -2,24 +2,14 @@
 
 import { useEffect } from "react"
 
-/**
- * Single mutable input state for the one world instance.
- * Keyboard listeners and the on-screen joystick both write here;
- * the robot's useFrame reads it. Avoids context / prop drilling.
- */
 export const input = {
-  /** -1..1, forward is -Z (into the screen) */
   forward: 0,
-  /** -1..1, right is +X */
   right: 0,
   sprint: false,
-  /** joystick vector, -1..1 each axis; forward push = negative y */
   touchX: 0,
   touchY: 0,
   touchActive: false,
-  /** set by HUD fast-travel chips; robot walks here then clears it */
   travelTarget: null as [number, number] | null,
-  /** bumped when the player presses the interact key */
   interactNonce: 0,
 }
 
@@ -34,65 +24,51 @@ export function resetInput() {
 }
 
 const KEYMAP: Record<string, "up" | "down" | "left" | "right" | "sprint" | "interact"> = {
-  ArrowUp: "up",
-  KeyW: "up",
-  ArrowDown: "down",
-  KeyS: "down",
-  ArrowLeft: "left",
-  KeyA: "left",
-  ArrowRight: "right",
-  KeyD: "right",
-  ShiftLeft: "sprint",
-  ShiftRight: "sprint",
-  KeyE: "interact",
-  Space: "interact",
-  Enter: "interact",
+  ArrowUp: "up", KeyW: "up", ArrowDown: "down", KeyS: "down",
+  ArrowLeft: "left", KeyA: "left", ArrowRight: "right", KeyD: "right",
+  ShiftLeft: "sprint", ShiftRight: "sprint",
+  KeyE: "interact", Space: "interact", Enter: "interact",
 }
 
-export function useKeyboardControls() {
+export function useKeyboardControls(enabled = true) {
   useEffect(() => {
+    if (!enabled) { resetInput(); return }
+    // Track physical keys so releasing W while holding ArrowUp keeps moving.
     const held = new Set<string>()
-
     const apply = () => {
-      input.forward = (held.has("up") ? 1 : 0) - (held.has("down") ? 1 : 0)
-      input.right = (held.has("right") ? 1 : 0) - (held.has("left") ? 1 : 0)
-      input.sprint = held.has("sprint")
+      const active = new Set(Array.from(held, (code) => KEYMAP[code]))
+      input.forward = Number(active.has("up")) - Number(active.has("down"))
+      input.right = Number(active.has("right")) - Number(active.has("left"))
+      input.sprint = active.has("sprint")
     }
-
-    const onKey = (e: KeyboardEvent, down: boolean) => {
-      const action = KEYMAP[e.code]
+    const onKey = (event: KeyboardEvent, down: boolean) => {
+      const action = KEYMAP[event.code]
       if (!action) return
-      // don't hijack typing in inputs
-      const el = e.target as HTMLElement | null
-      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return
+      if (!down) { held.delete(event.code); apply(); return }
+      const element = event.target as HTMLElement | null
+      if (event.ctrlKey || event.metaKey || event.altKey || element?.isContentEditable ||
+          element?.closest("input, textarea, select, button, a, summary, [role='dialog']")) return
       if (action === "interact") {
-        if (down && !e.repeat) input.interactNonce++
-        e.preventDefault()
+        if (!event.repeat) input.interactNonce++
+        event.preventDefault()
         return
       }
-      if (["up", "down", "left", "right"].includes(action)) e.preventDefault()
-      if (down) held.add(action)
-      else held.delete(action)
-      // any manual key cancels fast-travel
-      if (down) input.travelTarget = null
+      if (action !== "sprint") event.preventDefault()
+      held.add(event.code)
+      input.travelTarget = null
       apply()
     }
-
-    const kd = (e: KeyboardEvent) => onKey(e, true)
-    const ku = (e: KeyboardEvent) => onKey(e, false)
-    const blur = () => {
-      held.clear()
-      apply()
-    }
-
-    window.addEventListener("keydown", kd)
-    window.addEventListener("keyup", ku)
+    const down = (event: KeyboardEvent) => onKey(event, true)
+    const up = (event: KeyboardEvent) => onKey(event, false)
+    const blur = () => { held.clear(); resetInput() }
+    window.addEventListener("keydown", down)
+    window.addEventListener("keyup", up)
     window.addEventListener("blur", blur)
     return () => {
-      window.removeEventListener("keydown", kd)
-      window.removeEventListener("keyup", ku)
+      window.removeEventListener("keydown", down)
+      window.removeEventListener("keyup", up)
       window.removeEventListener("blur", blur)
       resetInput()
     }
-  }, [])
+  }, [enabled])
 }

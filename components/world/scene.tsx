@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { useFrame, useThree } from "@react-three/fiber"
 import { Html, Sky } from "@react-three/drei"
 import * as THREE from "three"
@@ -10,6 +10,7 @@ import { SIGNS, ZONES, type SignKind } from "./world-data"
 import { bannerTexture } from "./poster-texture"
 import { plazaTexture, fieldTexture } from "./ground-texture"
 import { input } from "./controls"
+import type { RenderQuality } from "@/lib/world-settings"
 import {
   Bench,
   Planter,
@@ -50,6 +51,8 @@ const LAMPS: [number, number, number][] = Array.from({ length: 8 }, (_, i) => {
 })
 
 type Props = {
+  quality: RenderQuality
+  shadowSize: number
   activeId: string | null
   focusId: string | null
   onProximity: (id: string | null) => void
@@ -128,6 +131,7 @@ function Building({ position, size, color }: { position: [number, number, number
 
 function EntranceSign() {
   const tex = useMemo(() => bannerTexture(), [])
+  useEffect(() => () => tex.dispose(), [tex])
   return (
     <group position={[0, 0, 11.5]}>
       {/* stone base on the ground */}
@@ -171,11 +175,12 @@ function EntranceSign() {
 
 function Plaza() {
   const stone = useMemo(() => {
-    const t = plazaTexture().clone()
+    const t = plazaTexture()
     t.needsUpdate = true
     t.repeat.set(3.2, 3.2)
     return t
   }, [])
+  useEffect(() => () => stone.dispose(), [stone])
   const spokes = Array.from({ length: 12 }, (_, i) => (i / 12) * Math.PI * 2)
   return (
     <group position={[0, 0, 0.5]}>
@@ -226,7 +231,7 @@ function Path({ to }: { to: [number, number] }) {
   )
 }
 
-export function Scene({ activeId, focusId, onProximity, onSelect, onInteract, onReleaseFocus }: Props) {
+export function Scene({ activeId, focusId, onProximity, onSelect, onInteract, onReleaseFocus, quality, shadowSize }: Props) {
   const robotRef = useRef<THREE.Group>(null)
   const robotPos = useRef(new THREE.Vector3())
   const lookTarget = useRef(new THREE.Vector3(0, 1.8, 0))
@@ -238,8 +243,10 @@ export function Scene({ activeId, focusId, onProximity, onSelect, onInteract, on
   const { camera } = useThree()
 
   const field = useMemo(() => fieldTexture(), [])
+  useEffect(() => () => field.dispose(), [field])
 
-  useFrame((_, dt) => {
+  useFrame((_, rawDt) => {
+    const dt = Math.min(rawDt, 0.05)
     const p = robotPos.current
     const focus = focusId ? SIGNS.find((s) => s.id === focusId) : null
 
@@ -317,12 +324,12 @@ export function Scene({ activeId, focusId, onProximity, onSelect, onInteract, on
       <hemisphereLight color="#ffdcae" groundColor="#6b4a33" intensity={0.65} />
       <directionalLight position={[16, 9, 15]} intensity={0.5} color="#9db8ff" />
       <directionalLight
-        castShadow
+        castShadow={quality !== "battery"}
         position={[-14, 16, -7]}
         intensity={2.3}
         color="#ffcf9e"
-        shadow-mapSize-width={1536}
-        shadow-mapSize-height={1536}
+        shadow-mapSize-width={shadowSize}
+        shadow-mapSize-height={shadowSize}
         shadow-camera-near={0.5}
         shadow-camera-far={70}
         shadow-camera-left={-34}
@@ -358,7 +365,7 @@ export function Scene({ activeId, focusId, onProximity, onSelect, onInteract, on
       ))}
 
       {LAMPS.map((pos, i) => (
-        <Lamp key={i} position={pos} light={i % 2 === 0} />
+        <Lamp key={i} position={pos} light={quality !== "battery" && i % 2 === 0} />
       ))}
       <StringLights
         spans={LAMPS.map(

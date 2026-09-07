@@ -1,35 +1,20 @@
-import type React from "react"
+import type { ReactNode } from "react"
 import type { Metadata } from "next"
-import { Geist, Manrope } from "next/font/google"
+import { GeistSans } from "geist/font/sans"
+import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"
 
-const geist = Geist({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-geist",
-})
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-manrope",
-})
-
 export const metadata: Metadata = {
-  title: "Ashwin Prakash's Résumé",
-  description:
-    "Ashwin Prakash — senior in Electrical & Computer Engineering at UT Austin, working in machine learning, computer vision, and robotics.",
-  generator: "v0.app",
+  metadataBase: new URL("https://ashwinprakash.vercel.app"),
+  title: "Ashwin Prakash | Machine Learning & Robotics",
+  description: "Electrical & Computer Engineering at UT Austin. Explore Ashwin Prakash’s work in machine learning, computer vision, robotics, and an interactive 3D portfolio.",
+  alternates: { canonical: "/" },
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${geist.variable} ${manrope.variable} antialiased`}>
-      <body className="font-sans">{children}</body>
+    <html lang="en" className={GeistSans.variable} suppressHydrationWarning>
+      <body><ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>{children}</ThemeProvider></body>
     </html>
   )
 }
