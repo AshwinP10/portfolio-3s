@@ -6,8 +6,8 @@ import "./globals.css"
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ashwinprakash.vercel.app"),
-  title: "Ashwin Prakash | Machine Learning & Robotics",
-  description: "Electrical & Computer Engineering at UT Austin. Explore Ashwin Prakash’s work in machine learning, computer vision, robotics, and an interactive 3D portfolio.",
+  title: "Ashwin Prakash | ECE @ UT Austin",
+  description: "Ashwin Prakash — senior in Electrical & Computer Engineering at UT Austin. Interested in computer vision, machine learning, and full-stack.",
   alternates: { canonical: "/" },
 }
 

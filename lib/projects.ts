@@ -14,7 +14,7 @@ const presentation: Record<string, Pick<Project, "category" | "summary" | "highl
   "plate-em": { category: "Applications", summary: "Personalized meal planning built around menus from UT Austin’s dining halls.", highlight: "3", highlightLabel: "dining halls · personalized meal plans" },
   steamboard: { category: "Applications", summary: "A React dashboard for exploring Steam game and player statistics.", highlight: "Steamboard", highlightLabel: "games · players · data visualization" },
   sat3dgs: { category: "Machine learning", summary: "Exploring 3D reconstruction from satellite imagery with Gaussian Splatting.", highlight: "Sat3DGS", highlightLabel: "satellite imagery → 3D reconstruction" },
-  "this-site": { category: "Applications", summary: "A playable portfolio with a robot guide, an Austin-inspired plaza, and stories to discover.", highlight: "Explore in 3D", highlightLabel: "Next.js · React Three Fiber" },
+  "this-site": { category: "Applications", summary: "The 3D version of this résumé — a small plaza you walk around with a robot.", highlight: "Explore in 3D", highlightLabel: "Next.js · React Three Fiber" },
 }
 
 export const projects: Project[] = SIGNS.filter((sign) => sign.kind === "project").map((sign) => ({ ...sign, ...presentation[sign.id] }))

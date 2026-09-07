@@ -93,8 +93,8 @@ export const SIGNS: SignData[] = [
     meta: "Austin, TX",
     bullets: [
       "B.S. Electrical & Computer Engineering, May 2027 · GPA 3.7",
-      "Machine learning, computer vision, and robotics — perception pipelines, multimodal models, sensor fusion, and simulation.",
-      "I like building systems that can see and reason about the physical world, and shipping them end to end.",
+      "Interested in computer vision, machine learning, and full-stack.",
+      "Most of my experience so far has been internships and lab research.",
     ],
     tags: ["Algorithms", "Software Testing", "Data Science Lab", "Embedded Systems", "Probability"],
     links: [{ label: "GitHub", href: "https://github.com/AshwinP10" }],

@@ -10,5 +10,5 @@ const skills = [
 ]
 
 export function SkillsSection() {
-  return <section className="section-shell section-pad skills-section" id="skills" aria-labelledby="skills-title"><div className="section-heading"><div><p className="eyebrow">04 / THE TOOLBOX</p><h2 id="skills-title">Across the stack.</h2></div><p>The tools I use to connect<br />software, intelligence, and hardware.</p></div><div className="skills-grid">{skills.map(({ title, icon: Icon, items }) => <div className="skill-group" key={title}><Icon size={23} /><h3>{title}</h3><div className="tag-list">{items.map((item) => <span key={item}>{item}</span>)}</div></div>)}</div></section>
+  return <section className="section-shell section-pad skills-section" id="skills" aria-labelledby="skills-title"><div className="section-heading"><div><p className="eyebrow">04 / SKILLS</p><h2 id="skills-title">Skills</h2></div><p>Tools I&apos;ve worked with.</p></div><div className="skills-grid">{skills.map(({ title, icon: Icon, items }) => <div className="skill-group" key={title}><Icon size={23} /><h3>{title}</h3><div className="tag-list">{items.map((item) => <span key={item}>{item}</span>)}</div></div>)}</div></section>
 }
